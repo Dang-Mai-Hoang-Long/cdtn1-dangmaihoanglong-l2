@@ -1,4 +1,4 @@
-# <Tên phạm vi bằng một câu>
+# Nhân viên ghi nhận yêu cầu, tra cứu khách hàng theo số điện thoại, ghi nhận thiết bị và mô tả lỗi, phân loại nhóm sự cố, xác định mức độ ưu tiên, sinh hạn cam kết và theo dõi trạng thái phiếu đến khi đóng.
 
 Sinh viên:
 Đặng Mai Hoàng Long - 2374802013303 - Track SE
