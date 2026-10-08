@@ -1,7 +1,7 @@
 # <Tên phạm vi bằng một câu>
 
 Sinh viên:
-Nguyễn Văn An - 2200xxxx - Track SE
+Đặng Mai Hoàng Long - 2374802013303 - Track SE
 Học phần:
 Chuyên đề Tốt nghiệp 1, HK1 2026-2027
 Luồng nghiệp vụ:
@@ -9,7 +9,7 @@ L2 – Tiếp nhận và phân loại yêu cầu bảo hành
 
 ## 1. Mục tiêu
 
-Mô tả ngắn 3–4 dòng: hệ thống này giải quyết vấn đề gì cho ai.
+Mô tả: Nhân viên ghi nhận yêu cầu, tra cứu khách hàng theo số điện thoại, ghi nhận thiết bị và mô tả lỗi, phân loại nhóm sự cố, xác định mức độ ưu tiên, sinh hạn cam kết và theo dõi trạng thái phiếu đến khi đóng.
 
 ## 2. Yêu cầu môi trường
 
