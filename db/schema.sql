@@ -91,7 +91,6 @@ CREATE TABLE ticket (
     priority        VARCHAR(10) NOT NULL,
     status          VARCHAR(20) NOT NULL DEFAULT 'MOI',
 
-    technician_id   BIGINT,
 
     received_at     TIMESTAMP NOT NULL,
     due_date        TIMESTAMP NOT NULL,
