@@ -24,7 +24,7 @@
 - Quyết định : SỬA
 - Lý do : Trường thông tin chưa đóng vai trò chính trong quá trình tạo và phân loại phiếu bảo hành trong luồng nghiệp vụ Tiếp nhận và phân loại phiếu bảo hành.
 - Ảnh hưởng : Lược bỏ trường technician_id trong bảng ticket của ERD trong phiên bản này. Xóa thiết lập trường technician_id của bảng ticket trong SQL DDL skeleton của trường changed_by.
-- File thay đổi: schema.sql.
+- File thay đổi: schema.sql, erd.drawio.
 
 ### TD-04 Chỉnh sửa Bảng thuật ngữ trong mục SRS
 
