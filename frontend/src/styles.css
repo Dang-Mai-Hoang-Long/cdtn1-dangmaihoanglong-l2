@@ -1,0 +1,546 @@
+﻿* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
+  margin: 0;
+  color: #222;
+  background: #fff;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 14px;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.khungNoiDung {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1px 0;
+}
+
+.manHinh h1,
+.manHinh h2,
+.manHinh p {
+  margin-top: 0;
+}
+
+.manHinh h1 {
+  font-size: 18px;
+  font-weight: 400;
+}
+
+.an {
+  display: none !important;
+}
+
+/* Wireframe 1: nhận diện hệ thống bên trái, tiêu đề và nút ở bên phải. */
+.manHinhDanhSach {
+  position: relative;
+  width: 860px;
+  height: 740px;
+  margin: 38px 0 38px 40px;
+  border: 1px solid #666;
+}
+
+.manHinhDanhSach::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 119px;
+  border-left: 1px solid #666;
+  content: "";
+  pointer-events: none;
+}
+
+.dauTrangDanhSach {
+  display: grid;
+  grid-template-columns: 120px 720px;
+  column-gap: 9px;
+  min-height: 70px;
+}
+
+.nhanDienHeThong {
+  display: flex;
+  width: 120px;
+  height: 70px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #9673a6;
+  border-right: 0;
+  background: #e1d5e7;
+  font-size: 16px;
+}
+
+.thanhTieuDeDanhSach {
+  position: relative;
+  height: 70px;
+}
+
+.thanhTieuDeDanhSach h1 {
+  display: flex;
+  width: 720px;
+  height: 40px;
+  align-items: center;
+  margin: 0;
+  padding: 0 10px;
+  border: 1px solid #666;
+  background: #e6e6e6;
+  font-size: 16px;
+  justify-content: center;
+  text-align: center;
+}
+
+.vaiTroTiepNhan {
+  position: absolute;
+  top: 698px;
+  left: 0;
+  display: flex;
+  width: 120px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  border-top: 1px solid #888;
+  border-right: 0;
+  border-bottom: 0;
+  border-left: 0;
+  border-radius: 0;
+  background: #f5f5f5;
+  color: #444;
+  font-size: 12px;
+  text-align: center;
+}
+
+.nut {
+  min-height: 30px;
+  padding: 4px 10px;
+  border: 1px solid #888;
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.nutTaoPhieu {
+  position: absolute;
+  top: 50px;
+  right: 0;
+  width: 131px;
+  padding-right: 6px;
+  padding-left: 6px;
+  border-color: #82b366;
+  border-radius: 4px;
+  background: #d5e8d4;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.noiDungDanhSach {
+  display: grid;
+  grid-template-columns: 120px 720px;
+  column-gap: 9px;
+  margin-top: 20px;
+}
+
+.noiDungDanhSach h2 {
+  height: 30px;
+  margin: 0;
+  padding: 6px;
+  border: 1px solid #666;
+  border-right: 0;
+  background: #ffcc99;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.vungBang {
+  width: 720px;
+  min-width: 0;
+}
+
+.bangCuon {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.bangCuon table {
+  width: 719px;
+  border-collapse: collapse;
+  table-layout: fixed;
+  text-align: center;
+}
+
+.bangCuon th,
+.bangCuon td {
+  height: 30px;
+  padding: 4px 5px;
+  border: 1px solid #b3b3b3;
+  font-size: 12px;
+  font-weight: 400;
+  overflow-wrap: anywhere;
+}
+
+.bangCuon th {
+  border-color: #b3b3b3;
+  background: transparent;
+}
+
+.bangCuon th:nth-child(1),
+.bangCuon td:nth-child(1) { width: 40px; }
+.bangCuon th:nth-child(2),
+.bangCuon td:nth-child(2) { width: 80px; }
+.bangCuon th:nth-child(3),
+.bangCuon td:nth-child(3) { width: 100px; }
+.bangCuon th:nth-child(4),
+.bangCuon td:nth-child(4) { width: 80px; }
+.bangCuon th:nth-child(5),
+.bangCuon td:nth-child(5) { width: 120px; }
+.bangCuon th:nth-child(6),
+.bangCuon td:nth-child(6) { width: 120px; }
+.bangCuon th:nth-child(7),
+.bangCuon td:nth-child(7) { width: 100px; }
+.bangCuon th:nth-child(8),
+.bangCuon td:nth-child(8) { width: 79px; }
+
+.trangThai {
+  margin-top: 10px;
+  padding: 0;
+  text-align: left;
+}
+
+.danhSachTrong {
+  padding: 12px 0 0;
+  border: 0;
+  text-align: left;
+}
+
+.danhSachTrong .nutNho {
+  display: block;
+  margin: 8px 0 0;
+}
+
+#danh-sach-loi .nutNho {
+  display: block;
+  margin: 8px 0 0;
+}
+
+.nutNho {
+  margin-left: 8px;
+  border: 1px solid #888;
+  background: #f5f5f5;
+  cursor: pointer;
+}
+
+/* Wireframe 2: form hẹp, nhãn trái và trường nhập bên phải. */
+.manHinhTaoPhieu,
+.manHinhXacNhan {
+  width: 480px;
+  min-height: 578px;
+  margin: 38px auto;
+  border: 1px solid #666;
+}
+
+.tieuDeManHinh {
+  display: flex;
+  width: 100%;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  border: 0;
+  border-bottom: 1px solid #666;
+  background: #f5f5f5;
+}
+
+.tieuDeManHinh h1 {
+  margin: 0;
+  padding: 0 10px;
+  font-size: 16px;
+  text-align: center;
+}
+
+.bieuMau {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  margin-top: 50px;
+  padding: 0 19px;
+}
+
+.truongHang {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  column-gap: 10px;
+  min-height: 30px;
+  align-items: start;
+}
+
+.truongHang > label,
+.truongHang > legend {
+  min-height: 30px;
+  padding-top: 6px;
+  line-height: 18px;
+}
+
+.truongHang input,
+.truongHang select,
+.truongHang textarea {
+  width: 160px;
+  min-height: 30px;
+  padding: 4px 6px;
+  border: 1px solid #ccc;
+  border-radius: 0;
+  background: #fff;
+}
+
+.truongHang textarea {
+  width: 280px;
+  height: 70px;
+  resize: vertical;
+}
+
+.truongHang input:not([type="radio"]),
+.truongHang textarea {
+  border: 1px solid #999;
+  background: #fff;
+}
+
+.truongHang select {
+  width: min(180px, 100%);
+  border-color: #000;
+  border-radius: 4px;
+  background: transparent;
+}
+
+.hangTraCuu {
+  display: flex;
+  align-items: start;
+  gap: 40px;
+}
+
+.nutTraCuu {
+  width: 80px;
+  border-color: #aaa;
+  border-radius: 4px;
+  background: #f5f5f5;
+}
+
+.truongMoTa {
+  min-height: 70px;
+}
+
+.ghiChu {
+  width: 280px;
+  margin: 4px 0 0;
+  color: #555;
+  font-size: 12px;
+}
+
+.thongBao {
+  width: 440px;
+  margin: 0;
+  padding: 8px;
+  border: 1px solid #b85450;
+  background: #f8cecc;
+  font-size: 12px;
+}
+
+.nhomNut {
+  display: flex;
+  justify-content: flex-end;
+  gap: 20px;
+  width: 440px;
+  margin-top: 30px;
+}
+
+.nhomNut .nut {
+  width: 80px;
+  border-radius: 4px;
+  background: #f5f5f5;
+}
+
+.nhomNut .nutChinh {
+  border-color: #000;
+  background: #000;
+  color: #fff;
+}
+
+.manHinhTaoPhieu .nhomNut {
+  margin-right: 0;
+  margin-left: 0;
+  margin-top: 106px;
+}
+
+.truongUuTien {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.truongUuTien legend {
+  float: left;
+  width: 150px;
+}
+
+.cacMucUuTien {
+  display: flex;
+  min-height: 30px;
+  align-items: center;
+  gap: 12px;
+  white-space: nowrap;
+}
+
+.cacMucUuTien label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 30px;
+  padding: 0;
+  line-height: 18px;
+}
+
+.cacMucUuTien input[type="radio"] {
+  width: auto;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  accent-color: #333;
+}
+
+.canhBaoBaoHanh {
+  display: flex;
+  width: 440px;
+  height: 30px;
+  align-items: center;
+  gap: 5px;
+  padding: 0 6px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 12px;
+}
+
+.canhBaoBaoHanh span {
+  font-size: 16px;
+}
+
+/* Wireframe 3: mã và thời gian nằm trước thông tin khách hàng. */
+.khungXacNhan {
+  width: 100%;
+  margin-top: 50px;
+  padding: 0 19px;
+}
+
+.nhomThongTin {
+  display: grid;
+  grid-template-columns: 150px 160px;
+  column-gap: 10px;
+  grid-auto-rows: 30px;
+  row-gap: 10px;
+  margin: 0;
+}
+
+.nhomThongTin dt,
+.nhomThongTin dd {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.nhomThongTin dd {
+  padding: 0 4px;
+}
+
+.nhomThongTinKhachHang {
+  grid-template-rows: 30px 30px 30px 70px 30px 30px;
+  margin-top: 8px;
+}
+
+.nhomThongTinKhachHang dt:nth-of-type(4),
+.nhomThongTinKhachHang dd:nth-of-type(4) {
+  align-items: flex-start;
+  padding-top: 6px;
+}
+
+.nhomThongTinKhachHang dd:nth-of-type(4) {
+  white-space: pre-wrap;
+}
+
+.nhomThongTinHan {
+  margin-top: 10px;
+}
+
+.khungXacNhan .nhomNut {
+  margin-top: 50px;
+}
+
+@media (max-width: 900px) {
+  .manHinhDanhSach {
+    width: calc(100% - 40px);
+    margin: 38px 0 38px 40px;
+  }
+
+  .dauTrangDanhSach,
+  .noiDungDanhSach {
+    grid-template-columns: 120px minmax(0, 1fr);
+  }
+
+  .manHinhDanhSach { height: 740px; }
+
+  .thanhTieuDeDanhSach h1,
+  .vungBang {
+    width: 100%;
+  }
+}
+
+@media (max-width: 520px) {
+  .khungNoiDung { padding: 1px 12px; }
+  .manHinhDanhSach { width: 100%; height: 740px; margin: 28px 0; }
+  .manHinhTaoPhieu,
+  .manHinhXacNhan,
+  .tieuDeManHinh,
+  .bieuMau,
+  .khungXacNhan { width: 100%; }
+  .bieuMau,
+  .khungXacNhan { padding-right: 10px; padding-left: 10px; }
+  .truongHang { grid-template-columns: 128px minmax(0, 1fr); column-gap: 8px; }
+  .truongHang input,
+  .truongHang select { width: 100%; }
+  .truongHang select { width: min(180px, 100%); }
+  .truongUuTien legend { width: 128px; }
+  .cacMucUuTien { gap: 4px; font-size: 12px; }
+  .truongHang textarea,
+  .ghiChu { width: 100%; }
+  .hangTraCuu { gap: 8px; }
+  .hangTraCuu input { min-width: 0; }
+  .hangTraCuu .nutTraCuu { flex: 0 0 76px; }
+  .thongBao,
+  .canhBaoBaoHanh,
+  .nhomNut { width: 100%; }
+  .nhomThongTin { grid-template-columns: minmax(128px, 150px) minmax(0, 160px); }
+  .dauTrangDanhSach { grid-template-columns: 110px minmax(0, 1fr); column-gap: 8px; }
+  .nhanDienHeThong { width: 110px; font-size: 14px; }
+  .thanhTieuDeDanhSach h1 { width: 100%; font-size: 16px; }
+  .noiDungDanhSach { grid-template-columns: 110px minmax(0, 1fr); column-gap: 8px; }
+  .vungBang { width: 100%; }
+}
+
+
+/* Dùng cạnh khung ngoài hoặc đường phân chia làm viền chung. */
+.nhanDienHeThong { border-top: 0; border-left: 0; border-right: 0; }
+.thanhTieuDeDanhSach h1 { border-top: 0; }
+.vaiTroTiepNhan { border-right: 1px solid #888; }
+.noiDungDanhSach h2 { border-left: 0; border-right: 0; }
+
+/* Hai nút tác vụ đồng đều và đủ chỗ cho cả hai nhãn. */
+.nhomNut .nut { width: 92px; min-width: 0; flex: 0 0 92px; white-space: nowrap; }
+@media (max-width: 520px) { .nhomNut .nut { flex: 0 1 92px; } }

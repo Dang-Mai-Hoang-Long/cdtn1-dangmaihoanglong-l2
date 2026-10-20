@@ -1,0 +1,30 @@
+{
+  "name": "cdtn1-l2-tiep-nhan-bao-hanh",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Module tiếp nhận và phân loại yêu cầu bảo hành (Mekong Mobile)",
+  "scripts": {
+    "build": "vite --config vite.config.js build",
+    "dev": "concurrently -k -n api,vite \"npm:dev:api\" \"npm:dev:frontend\"",
+    "dev:api": "node src/server.js",
+    "dev:frontend": "vite --config vite.config.js",
+    "start": "npm run build && node src/server.js",
+    "test": "node --test \"tests/*.test.js\""
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "dotenv": "^18.0.8",
+    "express": "^5.3.0",
+    "pg": "^8.23.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.1.2",
+    "concurrently": "^10.0.6",
+    "vite": "^8.3.4"
+  }
+}
