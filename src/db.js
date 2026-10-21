@@ -1,9 +1,9 @@
 import "dotenv/config";
-import pg from "pg";
+import thuVienPg from "pg";
 
-const { Pool } = pg;
+const { Pool: BoKetNoi } = thuVienPg;
 
-const poolOptions = process.env.DATABASE_URL
+const tuyChonKetNoi = process.env.DATABASE_URL
   ? { connectionString: process.env.DATABASE_URL }
   : {
       host: process.env.DB_HOST || undefined,
@@ -13,10 +13,10 @@ const poolOptions = process.env.DATABASE_URL
       password: process.env.DB_PASSWORD || undefined,
     };
 
-const pool = new Pool(poolOptions);
+const boKetNoi = new BoKetNoi(tuyChonKetNoi);
 
-pool.on("error", (err) => {
-  console.error("Lỗi kết nối PostgreSQL:", err.message);
+boKetNoi.on("error", (loi) => {
+  console.error("Lỗi kết nối PostgreSQL:", loi.message);
 });
 
-export default pool;
+export default boKetNoi;

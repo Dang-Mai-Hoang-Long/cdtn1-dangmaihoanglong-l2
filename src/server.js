@@ -1,16 +1,16 @@
 import 'dotenv/config';
-import app from './app.js';
+import ungDung from './app.js';
 
-const port = Number(process.env.API_PORT) || 3001;
-const server = app.listen(port, () => {
-  console.log(`API đang chạy tại http://localhost:${port}`);
+const cong = Number(process.env.API_PORT) || 3001;
+const mayChu = ungDung.listen(cong, () => {
+  console.log(`API đang chạy tại http://localhost:${cong}`);
 });
 
-server.on('error', (error) => {
-  if (error.code === 'EADDRINUSE') {
-    console.error(`Cổng ${port} đang được sử dụng. Hãy dừng server đang chạy hoặc đổi PORT trong .env.`);
+mayChu.on('error', (loi) => {
+  if (loi.code === 'EADDRINUSE') {
+    console.error(`Cổng ${cong} đang được sử dụng. Hãy dừng server đang chạy hoặc đổi PORT trong .env.`);
   } else {
-    console.error('Không thể khởi động server:', error.message);
+    console.error('Không thể khởi động server:', loi.message);
   }
   process.exitCode = 1;
 });

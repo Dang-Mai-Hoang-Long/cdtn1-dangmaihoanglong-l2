@@ -13,7 +13,7 @@ Mô tả: Nhân viên ghi nhận yêu cầu, tra cứu khách hàng theo số đ
 
 ## 2. Yêu cầu môi trường
 
-Node.js 20 LTS (hoặc: Python 3.11 / JDK 21)
+Node.js 20 LTS
 PostgreSQL 16
 Biến môi trường: xem .env.example
 
