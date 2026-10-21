@@ -1,41 +1,40 @@
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import express from 'express';
-import pool from './db.js';
-import TicketRepository from './repositories/ticketRepository.js';
-import createTicketRoutes from './routes/TicketRoute.js';
-import TicketService from './services/ticketService.js';
+import duongDan from 'node:path';
+import { fileURLToPath as doiUrlThanhDuongDan } from 'node:url';
+import ungDungExpress from 'express';
+import boKetNoi from './db.js';
+import LoiUngDung from './errors/AppError.js';
+import xuLyLoiApi from './errors/errorHandler.js';
+import KhoPhieu from './repositories/ticketRepository.js';
+import taoTuyenPhieu from './routes/TicketRoute.js';
+import DichVuPhieu from './services/ticketService.js';
 
-const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const buildDirectory = path.join(projectRoot, 'dist');
+const duongDanGocDuAn = duongDan.resolve(duongDan.dirname(doiUrlThanhDuongDan(import.meta.url)), '..');
+const thuMucBanDung = duongDan.join(duongDanGocDuAn, 'dist');
 
-export function createApp({ database = pool } = {}) {
-  const app = express();
+export function taoUngDung({ coSoDuLieu = boKetNoi } = {}) {
+  const ungDung = ungDungExpress();
 
-  app.disable('x-powered-by');
-  app.use(express.json());
+  ungDung.disable('x-powered-by');
+  ungDung.use(ungDungExpress.json());
 
-  app.get('/health', (_request, response) => {
-    response.json({ status: 'ok' });
+  ungDung.get('/health', (_yeuCau, phanHoi) => {
+    phanHoi.json({ status: 'ok' });
   });
 
-  const ticketRepository = new TicketRepository(database);
-  const ticketService = new TicketService(ticketRepository);
-  app.use('/api/tickets', createTicketRoutes(ticketService));
+  const khoPhieu = new KhoPhieu(coSoDuLieu);
+  const dichVuPhieu = new DichVuPhieu(khoPhieu);
+  ungDung.use('/api/tickets', taoTuyenPhieu(dichVuPhieu));
 
-  app.use('/api', (error, _request, response, _next) => {
-    console.error('Lỗi API:', error.message);
-    response.status(500).json({
-      error: 'INTERNAL_SERVER_ERROR',
-      message: 'Không thể xử lý yêu cầu lúc này.',
-    });
+  ungDung.use('/api', (yeuCau, phanHoi, tiepTuc) => {
+    tiepTuc(new LoiUngDung('NOT_FOUND', 'Không tìm thấy API được yêu cầu.'));
   });
+  ungDung.use('/api', xuLyLoiApi);
 
-  app.use(express.static(buildDirectory, { index: 'index.html' }));
+  ungDung.use(ungDungExpress.static(thuMucBanDung, { index: 'index.html' }));
 
-  return app;
+  return ungDung;
 }
 
-const app = createApp();
+const ungDung = taoUngDung();
 
-export default app;
+export default ungDung;

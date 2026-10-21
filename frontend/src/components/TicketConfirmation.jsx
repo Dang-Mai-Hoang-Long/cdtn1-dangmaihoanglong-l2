@@ -1,4 +1,4 @@
-export default function TicketConfirmation({ onBack, onConfirm }) {
+export default function XacNhanPhieu({ khiQuayLai, khiXacNhan }) {
   return (
     <section className="manHinh manHinhXacNhan">
       <header className="tieuDeManHinh"><h1>Xác nhận tạo phiếu bảo hành</h1></header>
@@ -19,8 +19,8 @@ export default function TicketConfirmation({ onBack, onConfirm }) {
           <dt>Hạn cam kết bảo hành</dt><dd />
         </dl>
         <div className="nhomNut">
-          <button className="nut nutPhu" type="button" onClick={onBack}>Quay lại</button>
-          <button className="nut nutChinh" type="button" onClick={onConfirm}>Xác nhận</button>
+          <button className="nut nutPhu" type="button" onClick={khiQuayLai}>Quay lại</button>
+          <button className="nut nutChinh" type="button" onClick={khiXacNhan}>Xác nhận</button>
         </div>
       </section>
     </section>

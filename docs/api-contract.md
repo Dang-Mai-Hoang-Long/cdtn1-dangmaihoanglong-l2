@@ -209,11 +209,17 @@ status=MOI
 
 "customer_id": 1024,
 
+"customer_name": "Nguyen Van A",
+
 "device_id": 3311,
+
+"serial_no": "SN123456789",
 
 "status": "MOI",
 
 "priority": "TRUNG_BINH",
+
+"category_name": "Sạc",
 
 "received_at": "2026-09-08T14:30:00+07:00",
 
@@ -229,11 +235,17 @@ status=MOI
 
 "customer_id": 1025,
 
+"customer_name": "Tran Thi B",
+
 "device_id": 3312,
+
+"serial_no": "SN987654321",
 
 "status": "MOI",
 
 "priority": "CAO",
+
+"category_name": "Màn hình",
 
 "received_at": "2026-09-08T15:00:00+07:00",
 
@@ -300,4 +312,8 @@ status=MOI
 
 | **Trường** | **Bắt buộc** | **Kiểu / ràng buộc** | **Thông báo lỗi khi vi phạm** |
 |:--:|----|----|----|
-| status | Không | Một trong MOI/ DA_PHAN_CONG/ DANG_XU_LY/ CHO_LINH_KIEN/ HOAN_TAT/ DA_DONG | Không tìm thấy phiếu bảo hành có trạng thái phù hợp |
+| status | Không | Một trong MOI/ DA_PHAN_CONG/ DANG_XU_LY/ CHO_LINH_KIEN/ HOAN_TAT/ DA_DONG | Trạng thái phiếu bảo hành không hợp lệ |
+| page | Không | Số nguyên dương; mặc định 1 | Phải là số nguyên dương |
+| size | Không | Số nguyên từ 1 đến 100; mặc định 20 | Phải là số nguyên từ 1 đến 100 |
+
+Tham số `page` hoặc `size` không hợp lệ trả HTTP 400 với mã `INVALID_PAGE_SIZE`; trường sai được nêu trong `error.fields`.

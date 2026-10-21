@@ -20,7 +20,7 @@ textarea {
 
 .khungNoiDung {
   width: 100%;
-  max-width: 900px;
+  max-width: 1480px;
   margin: 0 auto;
   padding: 1px 0;
 }
@@ -43,10 +43,11 @@ textarea {
 /* Wireframe 1: nhận diện hệ thống bên trái, tiêu đề và nút ở bên phải. */
 .manHinhDanhSach {
   position: relative;
-  width: 860px;
-  height: 740px;
+  width: min(1520px, calc(100vw - 80px));
+  min-height: 900px;
   margin: 38px 0 38px 40px;
   border: 1px solid #666;
+  border-right-color: transparent;
 }
 
 .manHinhDanhSach::before {
@@ -59,9 +60,21 @@ textarea {
   pointer-events: none;
 }
 
+.manHinhDanhSach::after {
+  position: absolute;
+  top: -1px;
+  right: -10px;
+  bottom: -1px;
+  width: 10px;
+  border: 1px solid #666;
+  border-left: 0;
+  content: "";
+  pointer-events: none;
+}
+
 .dauTrangDanhSach {
   display: grid;
-  grid-template-columns: 120px 720px;
+  grid-template-columns: 120px minmax(0, 1fr);
   column-gap: 9px;
   min-height: 70px;
 }
@@ -85,7 +98,7 @@ textarea {
 
 .thanhTieuDeDanhSach h1 {
   display: flex;
-  width: 720px;
+  width: 100%;
   height: 40px;
   align-items: center;
   margin: 0;
@@ -99,7 +112,7 @@ textarea {
 
 .vaiTroTiepNhan {
   position: absolute;
-  top: 698px;
+  bottom: 0;
   left: 0;
   display: flex;
   width: 120px;
@@ -142,7 +155,7 @@ textarea {
 
 .noiDungDanhSach {
   display: grid;
-  grid-template-columns: 120px 720px;
+  grid-template-columns: 120px minmax(0, 1fr);
   column-gap: 9px;
   margin-top: 20px;
 }
@@ -159,8 +172,63 @@ textarea {
 }
 
 .vungBang {
-  width: 720px;
+  width: 100%;
   min-width: 0;
+}
+
+.dieuKhienDanhSach,
+.dieuKhienPhanTrang {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.dieuKhienDanhSach {
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+.dieuKhienDanhSach select {
+  min-height: 30px;
+  padding: 3px 8px;
+}
+
+.boLocTrangThai {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.boLocTrangThai label {
+  white-space: nowrap;
+}
+
+.boLocTrangThai select {
+  width: 80px;
+  min-width: 0;
+  padding: 2px 1px;
+  font-size: 10px;
+}
+
+.dieuKhienPhanTrang {
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.dieuKhienPhanTrang button {
+  min-height: 30px;
+  padding: 4px 10px;
+  border: 1px solid #888;
+  background: #f5f5f5;
+  cursor: pointer;
+}
+
+.dieuKhienPhanTrang button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 .bangCuon {
@@ -169,7 +237,8 @@ textarea {
 }
 
 .bangCuon table {
-  width: 719px;
+  width: 100%;
+  min-width: 1095px;
   border-collapse: collapse;
   table-layout: fixed;
   text-align: center;
@@ -191,21 +260,21 @@ textarea {
 }
 
 .bangCuon th:nth-child(1),
-.bangCuon td:nth-child(1) { width: 40px; }
+.bangCuon td:nth-child(1) { width: 50px; }
 .bangCuon th:nth-child(2),
-.bangCuon td:nth-child(2) { width: 80px; }
+.bangCuon td:nth-child(2) { width: 150px; white-space: nowrap; }
 .bangCuon th:nth-child(3),
-.bangCuon td:nth-child(3) { width: 100px; }
+.bangCuon td:nth-child(3) { width: 190px; }
 .bangCuon th:nth-child(4),
-.bangCuon td:nth-child(4) { width: 80px; }
+.bangCuon td:nth-child(4) { width: 160px; }
 .bangCuon th:nth-child(5),
-.bangCuon td:nth-child(5) { width: 120px; }
+.bangCuon td:nth-child(5) { width: 160px; white-space: nowrap; }
 .bangCuon th:nth-child(6),
-.bangCuon td:nth-child(6) { width: 120px; }
+.bangCuon td:nth-child(6) { width: 120px; white-space: nowrap; }
 .bangCuon th:nth-child(7),
-.bangCuon td:nth-child(7) { width: 100px; }
+.bangCuon td:nth-child(7) { width: 155px; }
 .bangCuon th:nth-child(8),
-.bangCuon td:nth-child(8) { width: 79px; }
+.bangCuon td:nth-child(8) { width: 110px; }
 
 .trangThai {
   margin-top: 10px;
@@ -485,16 +554,15 @@ textarea {
 
 @media (max-width: 900px) {
   .manHinhDanhSach {
-    width: calc(100% - 40px);
-    margin: 38px 0 38px 40px;
+    width: calc(100vw - 32px);
+    min-height: 900px;
+    margin: 24px auto;
   }
 
   .dauTrangDanhSach,
   .noiDungDanhSach {
     grid-template-columns: 120px minmax(0, 1fr);
   }
-
-  .manHinhDanhSach { height: 740px; }
 
   .thanhTieuDeDanhSach h1,
   .vungBang {
@@ -504,7 +572,7 @@ textarea {
 
 @media (max-width: 520px) {
   .khungNoiDung { padding: 1px 12px; }
-  .manHinhDanhSach { width: 100%; height: 740px; margin: 28px 0; }
+  .manHinhDanhSach { width: calc(100vw - 24px); min-height: 900px; margin: 20px auto; }
   .manHinhTaoPhieu,
   .manHinhXacNhan,
   .tieuDeManHinh,

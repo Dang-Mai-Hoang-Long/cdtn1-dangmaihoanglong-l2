@@ -1,9 +1,9 @@
-export default class TicketService {
-  constructor(ticketRepository) {
-    this.ticketRepository = ticketRepository;
+export default class DichVuPhieu {
+  constructor(khoPhieu) {
+    this.khoPhieu = khoPhieu;
   }
 
-  listTickets() {
-    return this.ticketRepository.list();
+  layDanhSachPhieu(tuyChonDanhSach) {
+    return this.khoPhieu.layDanhSach(tuyChonDanhSach);
   }
 }

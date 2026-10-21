@@ -1,8 +1,8 @@
-export default function TicketForm({ onCancel, onSubmit }) {
+export default function BieuMauPhieu({ khiHuy, khiGui }) {
   return (
     <section className="manHinh manHinhTaoPhieu">
       <header className="tieuDeManHinh"><h1>Tạo phiếu bảo hành</h1></header>
-      <form className="bieuMau" onSubmit={onSubmit}>
+      <form className="bieuMau" onSubmit={khiGui}>
         <div className="truongHang truongTraCuu">
           <label htmlFor="so-dien-thoai">Số điện thoại khách hàng</label>
           <div className="hangTraCuu">
@@ -44,7 +44,7 @@ export default function TicketForm({ onCancel, onSubmit }) {
         </fieldset>
         <div className="canhBaoBaoHanh" aria-hidden="true" />
         <div className="nhomNut">
-          <button className="nut nutPhu" type="button" onClick={onCancel}>Hủy</button>
+          <button className="nut nutPhu" type="button" onClick={khiHuy}>Hủy</button>
           <button className="nut nutChinh" type="submit">Tạo phiếu</button>
         </div>
       </form>

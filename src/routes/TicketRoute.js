@@ -1,12 +1,14 @@
-import { Router } from "express";
+import { Router as BoDinhTuyen } from "express";
+import { kiemTraTruyVanDanhSachPhieu } from '../validators/ticketValidator.js';
 
-export default function createTicketRoutes(ticketService) {
-  const router = Router();
+export default function taoTuyenPhieu(dichVuPhieu) {
+  const boDinhTuyen = BoDinhTuyen();
 
-  router.get("/", async (_request, response) => {
-    const tickets = await ticketService.listTickets();
-    response.json({ data: tickets });
+  boDinhTuyen.get("/", async (yeuCau, phanHoi) => {
+    const tuyChonDanhSach = kiemTraTruyVanDanhSachPhieu(yeuCau.query);
+    const ketQua = await dichVuPhieu.layDanhSachPhieu(tuyChonDanhSach);
+    phanHoi.json(ketQua);
   });
 
-  return router;
+  return boDinhTuyen;
 }

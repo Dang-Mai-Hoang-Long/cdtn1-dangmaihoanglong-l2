@@ -1,50 +1,50 @@
 import { useEffect, useState } from 'react';
-import TicketConfirmation from './TicketConfirmation.jsx';
-import TicketForm from './TicketForm.jsx';
-import TicketList from './TicketList.jsx';
+import XacNhanPhieu from './TicketConfirmation.jsx';
+import BieuMauPhieu from './TicketForm.jsx';
+import DanhSachPhieu from './TicketList.jsx';
 
-const screens = {
-  list: 'danh-sach',
-  form: 'tao-phieu',
-  confirmation: 'xac-nhan'
+const cacManHinh = {
+  danhSach: 'danh-sach',
+  taoPhieu: 'tao-phieu',
+  xacNhan: 'xac-nhan'
 };
 
-function screenFromHash() {
-  const currentHash = window.location.hash.slice(1);
-  return Object.keys(screens).find((screen) => screens[screen] === currentHash) || 'list';
+function layManHinhTuHash() {
+  const hashHienTai = window.location.hash.slice(1);
+  return Object.keys(cacManHinh).find((manHinh) => cacManHinh[manHinh] === hashHienTai) || 'danhSach';
 }
 
-export default function App() {
-  const [screen, setScreen] = useState(screenFromHash);
+export default function UngDung() {
+  const [manHinhHienTai, datManHinhHienTai] = useState(layManHinhTuHash);
 
   useEffect(() => {
-    const syncScreen = () => setScreen(screenFromHash());
-    window.addEventListener('hashchange', syncScreen);
-    return () => window.removeEventListener('hashchange', syncScreen);
+    const dongBoManHinh = () => datManHinhHienTai(layManHinhTuHash());
+    window.addEventListener('hashchange', dongBoManHinh);
+    return () => window.removeEventListener('hashchange', dongBoManHinh);
   }, []);
 
-  function navigate(nextScreen) {
-    const nextHash = `#${screens[nextScreen]}`;
-    if (window.location.hash === nextHash) setScreen(nextScreen);
-    else window.location.hash = nextHash;
+  function chuyenManHinh(manHinhTiepTheo) {
+    const hashTiepTheo = `#${cacManHinh[manHinhTiepTheo]}`;
+    if (window.location.hash === hashTiepTheo) datManHinhHienTai(manHinhTiepTheo);
+    else window.location.hash = hashTiepTheo;
     window.scrollTo(0, 0);
   }
 
-  function submitForm(event) {
-    event.preventDefault();
-    navigate('confirmation');
+  function guiBieuMau(suKien) {
+    suKien.preventDefault();
+    chuyenManHinh('xacNhan');
   }
 
   return (
     <main className="khungNoiDung">
-      {screen === 'list' && <TicketList onCreate={() => navigate('form')} />}
-      {screen === 'form' && (
-        <TicketForm onCancel={() => navigate('list')} onSubmit={submitForm} />
+      {manHinhHienTai === 'danhSach' && <DanhSachPhieu khiTaoPhieu={() => chuyenManHinh('taoPhieu')} />}
+      {manHinhHienTai === 'taoPhieu' && (
+        <BieuMauPhieu khiHuy={() => chuyenManHinh('danhSach')} khiGui={guiBieuMau} />
       )}
-      {screen === 'confirmation' && (
-        <TicketConfirmation
-          onBack={() => navigate('form')}
-          onConfirm={() => navigate('list')}
+      {manHinhHienTai === 'xacNhan' && (
+        <XacNhanPhieu
+          khiQuayLai={() => chuyenManHinh('taoPhieu')}
+          khiXacNhan={() => chuyenManHinh('danhSach')}
         />
       )}
     </main>
