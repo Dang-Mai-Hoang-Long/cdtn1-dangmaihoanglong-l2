@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react';
-import { phieuApi } from '../api/tickets.api.js';
+import { useEffect, useState } from "react";
+import { phieuApi } from "../api/tickets.api.js";
 
 export default function DanhSachPhieu({ khiTaoPhieu }) {
   const [cacPhieu, datCacPhieu] = useState([]);
   const [dangTai, datDangTai] = useState(true);
   const [loiTai, datLoiTai] = useState(null);
   const [soLanTaiLai, datSoLanTaiLai] = useState(0);
-  const [trangThaiLoc, datTrangThaiLoc] = useState('');
+  const [trangThaiLoc, datTrangThaiLoc] = useState("");
   const [trang, datTrang] = useState(1);
   const [kichThuoc, datKichThuoc] = useState(20);
   const [tongSo, datTongSo] = useState(0);
@@ -25,7 +25,7 @@ export default function DanhSachPhieu({ khiTaoPhieu }) {
           trangThai: trangThaiLoc || undefined,
           trang,
           kichThuoc,
-          signal: boDieuKhien.signal
+          signal: boDieuKhien.signal,
         });
         datCacPhieu(Array.isArray(ketQua?.data) ? ketQua.data : []);
         const tongSoPhieu = Number(ketQua?.total) || 0;
@@ -49,14 +49,20 @@ export default function DanhSachPhieu({ khiTaoPhieu }) {
         <div className="nhanDienHeThong">Mekong Mobile</div>
         <div className="thanhTieuDeDanhSach">
           <h1>Danh sách phiếu bảo hành</h1>
-          <button className="nut nutTaoPhieu" type="button" onClick={khiTaoPhieu}>
+          <button
+            className="nut nutTaoPhieu"
+            type="button"
+            onClick={khiTaoPhieu}
+          >
             + Tạo phiếu bảo hành
           </button>
         </div>
       </header>
 
       <div className="noiDungDanhSach">
-        <div className="cotBenTrai"><h2>Danh sách phiếu</h2></div>
+        <div className="cotBenTrai">
+          <h2>Danh sách phiếu</h2>
+        </div>
         <div className="vungBang">
           <div className="dieuKhienDanhSach">
             <label htmlFor="kich-thuoc-trang">Số dòng</label>
@@ -111,47 +117,75 @@ export default function DanhSachPhieu({ khiTaoPhieu }) {
               </thead>
               <tbody>
                 {dangTai && (
-                  <tr><td colSpan="8" role="status">Đang tải danh sách phiếu...</td></tr>
+                  <tr>
+                    <td colSpan="8" role="status">
+                      Đang tải danh sách phiếu...
+                    </td>
+                  </tr>
                 )}
                 {!dangTai && loiTai && (
                   <tr>
                     <td colSpan="8" role="alert">
-                      {loiTai.message}{' '}
-                      <button type="button" onClick={() => datSoLanTaiLai((lan) => lan + 1)}>
+                      {loiTai.message}{" "}
+                      <button
+                        type="button"
+                        onClick={() => datSoLanTaiLai((lan) => lan + 1)}
+                      >
                         Thử lại
                       </button>
                     </td>
                   </tr>
                 )}
                 {!dangTai && !loiTai && cacPhieu.length === 0 && (
-                  <tr><td colSpan="8">Chưa có phiếu bảo hành nào.</td></tr>
-                )}
-                {!dangTai && !loiTai && cacPhieu.map((phieu, chiSo) => (
-                  <tr key={phieu.ticket_id}>
-                    <td>{(trang - 1) * kichThuoc + chiSo + 1}</td>
-                    <td>{phieu.ticket_code}</td>
-                    <td>{phieu.customer_name}</td>
-                    <td>{phieu.serial_no}</td>
-                    <td>{phieu.status}</td>
-                    <td>{phieu.priority}</td>
-                    <td>{phieu.category_name || '—'}</td>
-                    <td>
-                      <button type="button" disabled title="Chức năng xem chi tiết chưa được triển khai">
-                        Chi tiết
-                      </button>
-                    </td>
+                  <tr>
+                    <td colSpan="8">Chưa có phiếu bảo hành nào.</td>
                   </tr>
-                ))}
+                )}
+                {!dangTai &&
+                  !loiTai &&
+                  cacPhieu.map((phieu, chiSo) => (
+                    <tr key={phieu.ticket_id}>
+                      <td>{(trang - 1) * kichThuoc + chiSo + 1}</td>
+                      <td>{phieu.ticket_code}</td>
+                      <td>{phieu.customer_name}</td>
+                      <td>{phieu.serial_no}</td>
+                      <td>{phieu.status}</td>
+                      <td>{phieu.priority}</td>
+                      <td>{phieu.category_name || "—"}</td>
+                      <td>
+                        <button
+                          type="button"
+                          disabled
+                          title="Chức năng xem chi tiết chưa được triển khai"
+                        >
+                          Chi tiết
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
           </div>
-          <div className="dieuKhienPhanTrang" aria-label="Điều khiển phân trang">
+          <div
+            className="dieuKhienPhanTrang"
+            aria-label="Điều khiển phân trang"
+          >
             <span>Tổng số phiếu: {tongSo}</span>
-            <button type="button" disabled={dangTai || trang <= 1} onClick={() => datTrang((giaTri) => giaTri - 1)}>
+            <button
+              type="button"
+              disabled={dangTai || trang <= 1}
+              onClick={() => datTrang((giaTri) => giaTri - 1)}
+            >
               Trang trước
             </button>
-            <span>Trang {trang} / {tongSoTrang}</span>
-            <button type="button" disabled={dangTai || trang >= tongSoTrang} onClick={() => datTrang((giaTri) => giaTri + 1)}>
+            <span>
+              Trang {trang} / {tongSoTrang}
+            </span>
+            <button
+              type="button"
+              disabled={dangTai || trang >= tongSoTrang}
+              onClick={() => datTrang((giaTri) => giaTri + 1)}
+            >
               Trang sau
             </button>
           </div>

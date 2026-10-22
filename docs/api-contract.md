@@ -4,7 +4,9 @@ Danh sách endpoint
 |:--:|----|----|----|
 | GET | /api/customers?phone={phone} | Tra cứu khách hàng theo số điện thoại | US-01 |
 | GET | /api/devices?serial={serial} &customer_id={customer_id} | Tra cứu thiết bị theo số serial/IMEI và kiểm tra thuộc khách hàng + còn hạn bảo hành | US-03 |
-| POST | /api/tickets | Tạo phiếu bảo hành mới (ghi nhận mô tả lỗi, nhóm sự cố, mức ưu tiên, sinh hạn cam kết) | US-02, US-04, US-05, |
+| GET | /api/tickets/categories | Lấy danh sách nhóm sự cố đang hoạt động và mức ưu tiên mặc định để điền biểu mẫu | US-04 |
+| POST | /api/tickets/preview | Kiểm tra dữ liệu phiếu và trả mức ưu tiên, thời điểm tiếp nhận, hạn cam kết để xác nhận; không lưu phiếu | US-02, US-04, US-05 |
+| POST | /api/tickets | Tạo phiếu bảo hành mới bằng dữ liệu đã xác nhận, lưu nguyên thời điểm tiếp nhận và hạn cam kết từ bước xem trước | US-02, US-04, US-05 |
 | GET | /api/tickets?status={status} | Xem danh sách phiếu bảo hành | US-06 |
 
 Quy ước chung
@@ -120,6 +122,33 @@ serial=SN123456789&customer_id=1024
 **RESPONSE 404 Not Found — Không tìm thấy thiết bị/ Không tìm thấy khách
 hàng**
 
+**GET /api/tickets/categories**
+
+Không cần request body. Trả về danh sách nhóm sự cố đang hoạt động, kèm mức ưu tiên mặc định để giao diện tự chọn khi người dùng chọn nhóm.
+
+**RESPONSE 200 OK**
+
+```json
+[
+  { "category_id": 1, "category_name": "Sạc", "default_priority": "TRUNG_BINH" }
+]
+```
+
+**POST /api/tickets/preview**
+
+Nhận các trường đầu vào giống phần tạo phiếu bên dưới, ngoại trừ `received_at` và `due_date`. Endpoint kiểm tra khách hàng, thiết bị, nhóm sự cố và điều kiện tiếp nhận; sinh mức ưu tiên cuối cùng, `received_at` và `due_date` để hiển thị trên màn hình xác nhận. Endpoint này không ghi dữ liệu.
+
+**RESPONSE 200 OK**
+
+```json
+{
+  "priority": "TRUNG_BINH",
+  "is_warranty": true,
+  "received_at": "2026-09-08T14:30:00.000Z",
+  "due_date": "2026-09-11T14:30:00.000Z"
+}
+```
+
 **POST /api/tickets**
 
 **REQUEST BODY**
@@ -136,9 +165,17 @@ hàng**
 
 "category_id": 1,
 
-"priority": "TRUNG_BINH"
+"priority": "TRUNG_BINH",
+
+"received_at": "2026-09-08T14:30:00.000Z",
+
+"due_date": "2026-09-11T14:30:00.000Z"
 
 }
+
+`received_at` và `due_date` là hai giá trị server trả về ở bước xem trước. Khi xác nhận, client gửi lại hai giá trị này; server kiểm tra định dạng và thứ tự thời gian rồi lưu chúng mà không sinh lại hạn cam kết.
+
+Việc tạo phiếu và ghi trạng thái ban đầu vào `ticket_status_log` nằm trong cùng transaction. Dòng khởi tạo có `from_status = NULL`, `to_status = 'MOI'`, `changed_at = received_at`; do L2 chưa có danh tính nhân viên, `changed_by = 0` được dành làm mã tác nhân hệ thống.
 
 **RESPONSE 201 Created**
 

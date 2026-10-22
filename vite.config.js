@@ -2,7 +2,7 @@ import 'dotenv/config';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-const congApi = Number(process.env.API_PORT) || 3001;
+const congApi = Number(process.env.API_PORT || process.env.PORT) || 3001;
 
 export default defineConfig({
   root: 'frontend',

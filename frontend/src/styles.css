@@ -308,6 +308,8 @@ textarea {
 /* Wireframe 2: form hẹp, nhãn trái và trường nhập bên phải. */
 .manHinhTaoPhieu,
 .manHinhXacNhan {
+  display: flex;
+  flex-direction: column;
   width: 480px;
   min-height: 578px;
   margin: 38px auto;
@@ -336,10 +338,12 @@ textarea {
 .bieuMau {
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
+  flex: 1;
   gap: 10px;
   width: 100%;
   margin-top: 50px;
-  padding: 0 19px;
+  padding: 0 19px 20px;
 }
 
 .truongHang {
@@ -348,6 +352,14 @@ textarea {
   column-gap: 10px;
   min-height: 30px;
   align-items: start;
+}
+
+.manHinhTaoPhieu .truongHang {
+  grid-template-columns: 175px minmax(0, 1fr);
+}
+
+.truongTraCuu > label {
+  white-space: nowrap;
 }
 
 .truongHang > label,
@@ -374,6 +386,10 @@ textarea {
   resize: vertical;
 }
 
+.manHinhTaoPhieu .truongMoTa textarea {
+  width: 100%;
+}
+
 .truongHang input:not([type="radio"]),
 .truongHang textarea {
   border: 1px solid #999;
@@ -391,6 +407,10 @@ textarea {
   display: flex;
   align-items: start;
   gap: 40px;
+}
+
+.truongTraCuu .hangTraCuu {
+  gap: 15px;
 }
 
 .nutTraCuu {
@@ -443,7 +463,7 @@ textarea {
 .manHinhTaoPhieu .nhomNut {
   margin-right: 0;
   margin-left: 0;
-  margin-top: 106px;
+  margin-top: auto;
 }
 
 .truongUuTien {
@@ -455,7 +475,7 @@ textarea {
 
 .truongUuTien legend {
   float: left;
-  width: 150px;
+  width: 175px;
 }
 
 .cacMucUuTien {
@@ -485,31 +505,86 @@ textarea {
 
 .canhBaoBaoHanh {
   display: flex;
+  box-sizing: border-box;
   width: 440px;
-  height: 30px;
+  height: 48px;
+  min-height: 48px;
   align-items: center;
   gap: 5px;
-  padding: 0 6px;
+  padding: 4px 6px;
   border: 0;
   background: transparent;
   color: inherit;
   font-size: 12px;
 }
 
-.canhBaoBaoHanh span {
+.canhBaoBaoHanh.coThongBao {
+  border: 1px solid #b85450;
+  background: #f8cecc;
+  color: #8a1c16;
+}
+
+.manHinhTaoPhieu .truongHang > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.manHinhTaoPhieu .hangTraCuu,
+.manHinhTaoPhieu .truongHang select,
+.manHinhTaoPhieu .truongHang textarea,
+.manHinhTaoPhieu .cacMucUuTien {
+  margin-bottom: 4px;
+}
+
+.manHinhTaoPhieu .loiTruong {
+  display: -webkit-box;
+  width: min(280px, 100%);
+  height: 14px;
+  min-height: 14px;
+  margin: 0;
+  color: #b3261e;
+  font-size: 12px;
+  line-height: 14px;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.loiTruong.trangThaiTraCuu { color: #555; }
+
+.truongHang [aria-invalid="true"] { border-color: #b3261e; }
+
+.hangTraCuuSerial { gap: 6px; }
+.hangTraCuuSerial input { min-width: 0; width: 160px; }
+.hangTraCuuSerial .nutTraCuu { flex: 0 0 80px; }
+
+.bieuTuongCanhBao {
+  flex: 0 0 auto;
   font-size: 16px;
+}
+
+.noiDungCanhBao {
+  min-width: 0;
+  line-height: 16px;
+  overflow-wrap: anywhere;
 }
 
 /* Wireframe 3: mã và thời gian nằm trước thông tin khách hàng. */
 .khungXacNhan {
+  display: flex;
+  box-sizing: border-box;
+  flex: 1;
+  flex-direction: column;
   width: 100%;
   margin-top: 50px;
-  padding: 0 19px;
+  padding: 0 19px 20px;
 }
 
 .nhomThongTin {
   display: grid;
-  grid-template-columns: 150px 160px;
+  grid-template-columns: 175px 160px;
   column-gap: 10px;
   grid-auto-rows: 30px;
   row-gap: 10px;
@@ -549,7 +624,8 @@ textarea {
 }
 
 .khungXacNhan .nhomNut {
-  margin-top: 50px;
+  margin-top: auto;
+  margin-bottom: 0;
 }
 
 @media (max-width: 900px) {
@@ -581,10 +657,11 @@ textarea {
   .bieuMau,
   .khungXacNhan { padding-right: 10px; padding-left: 10px; }
   .truongHang { grid-template-columns: 128px minmax(0, 1fr); column-gap: 8px; }
+  .manHinhTaoPhieu .truongHang { grid-template-columns: 175px minmax(0, 1fr); }
   .truongHang input,
   .truongHang select { width: 100%; }
   .truongHang select { width: min(180px, 100%); }
-  .truongUuTien legend { width: 128px; }
+  .truongUuTien legend { width: 175px; }
   .cacMucUuTien { gap: 4px; font-size: 12px; }
   .truongHang textarea,
   .ghiChu { width: 100%; }
@@ -594,7 +671,7 @@ textarea {
   .thongBao,
   .canhBaoBaoHanh,
   .nhomNut { width: 100%; }
-  .nhomThongTin { grid-template-columns: minmax(128px, 150px) minmax(0, 160px); }
+  .nhomThongTin { grid-template-columns: 175px minmax(0, 160px); }
   .dauTrangDanhSach { grid-template-columns: 110px minmax(0, 1fr); column-gap: 8px; }
   .nhanDienHeThong { width: 110px; font-size: 14px; }
   .thanhTieuDeDanhSach h1 { width: 100%; font-size: 16px; }

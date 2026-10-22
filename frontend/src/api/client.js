@@ -1,9 +1,12 @@
-const duongDanGocApi = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/+$/, '');
+const duongDanGocApi = (import.meta.env.VITE_API_BASE_URL || "").replace(
+  /\/+$/,
+  "",
+);
 
 export class LoiApi extends Error {
   constructor(maHttp, maLoi, thongDiep, loiTheoTruong = {}) {
     super(thongDiep);
-    this.name = 'LoiApi';
+    this.name = "LoiApi";
     this.maHttp = maHttp;
     this.maLoi = maLoi;
     this.loiTheoTruong = loiTheoTruong;
@@ -19,20 +22,24 @@ export class LoiApi extends Error {
  */
 export async function guiYeuCau(duongDan, tuyChon = {}) {
   const tieuDe = new Headers(tuyChon.headers);
-  tieuDe.set('Accept', 'application/json');
-  if (tuyChon.body && !tieuDe.has('Content-Type')) {
-    tieuDe.set('Content-Type', 'application/json');
+  tieuDe.set("Accept", "application/json");
+  if (tuyChon.body && !tieuDe.has("Content-Type")) {
+    tieuDe.set("Content-Type", "application/json");
   }
 
   let phanHoi;
   try {
     phanHoi = await fetch(`${duongDanGocApi}${duongDan}`, {
       ...tuyChon,
-      headers: tieuDe
+      headers: tieuDe,
     });
   } catch (loi) {
-    if (loi.name === 'AbortError') throw loi;
-    throw new LoiApi(0, 'LOI_KET_NOI', 'Không thể kết nối tới máy chủ. Vui lòng thử lại.');
+    if (loi.name === "AbortError") throw loi;
+    throw new LoiApi(
+      0,
+      "LOI_KET_NOI",
+      "Không thể kết nối tới máy chủ. Vui lòng thử lại.",
+    );
   }
 
   if (phanHoi.status === 204) return null;
@@ -45,12 +52,15 @@ export async function guiYeuCau(duongDan, tuyChon = {}) {
   }
 
   if (!phanHoi.ok) {
-    const loiMayChu = duLieu?.error && typeof duLieu.error === 'object'
-      ? duLieu.error
-      : duLieu;
-    const maLoi = loiMayChu?.code
-      || (typeof duLieu?.error === 'string' ? duLieu.error : `HTTP_${phanHoi.status}`);
-    const thongDiep = loiMayChu?.message || 'Yêu cầu không thể xử lý. Vui lòng thử lại.';
+    const loiMayChu =
+      duLieu?.error && typeof duLieu.error === "object" ? duLieu.error : duLieu;
+    const maLoi =
+      loiMayChu?.code ||
+      (typeof duLieu?.error === "string"
+        ? duLieu.error
+        : `HTTP_${phanHoi.status}`);
+    const thongDiep =
+      loiMayChu?.message || "Yêu cầu không thể xử lý. Vui lòng thử lại.";
     const loiTheoTruong = loiMayChu?.fields || loiMayChu?.chi_tiet || {};
 
     throw new LoiApi(phanHoi.status, maLoi, thongDiep, loiTheoTruong);

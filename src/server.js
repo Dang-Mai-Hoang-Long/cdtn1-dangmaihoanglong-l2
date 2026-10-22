@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import ungDung from './app.js';
 
-const cong = Number(process.env.API_PORT) || 3001;
+const cong = Number(process.env.API_PORT || process.env.PORT) || 3001;
 const mayChu = ungDung.listen(cong, () => {
   console.log(`API đang chạy tại http://localhost:${cong}`);
 });
