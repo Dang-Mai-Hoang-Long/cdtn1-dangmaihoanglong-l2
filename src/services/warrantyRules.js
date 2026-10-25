@@ -25,14 +25,3 @@ export function conHanBaoHanh(thietBi, ngayHienTai = new Date()) {
 
   return ngayHetHan >= ngayHienTai;
 }
-
-/**
- * Quyết định có tiếp nhận phiếu theo trạng thái bảo hành và cấu hình cho phép hết hạn.
- * @param {{purchase_date: string|null, warranty_months: number}} thietBi Thiết bị cần kiểm tra.
- * @param {boolean} choPhepHetHan Cấu hình cho phép tiếp nhận thiết bị đã hết hạn.
- * @returns {boolean} Thiết bị có được tiếp nhận theo chính sách hiện tại hay không.
- */
-export function duocTiepNhanBaoHanh(thietBi, choPhepHetHan) {
-  if (!thietBi.purchase_date) return false;
-  return conHanBaoHanh(thietBi) || choPhepHetHan;
-}

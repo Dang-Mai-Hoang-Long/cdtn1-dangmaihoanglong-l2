@@ -26,7 +26,7 @@ export default function taoTuyenPhieu(dichVuPhieu) {
     const duLieu = kiemTraDuLieuTaoPhieu(yeuCau.body, {
       batBuocHanDaXemTruoc: true,
     });
-    const phieu = await dichVuPhieu.taoPhieu(duLieu);
+    const phieu = await dichVuPhieu.xacNhanTaoPhieu(duLieu);
     phanHoi.status(201).json(phieu);
   });
 

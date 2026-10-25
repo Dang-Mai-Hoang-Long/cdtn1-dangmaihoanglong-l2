@@ -1,132 +1,90 @@
-Danh sách endpoint
+# Hợp đồng API — Luồng L2 tiếp nhận và phân loại phiếu bảo hành
 
-| **Method** | **Endpoint** | **Mục đích** | **US** |
-|:--:|----|----|----|
-| GET | /api/customers?phone={phone} | Tra cứu khách hàng theo số điện thoại | US-01 |
-| GET | /api/devices?serial={serial} &customer_id={customer_id} | Tra cứu thiết bị theo số serial/IMEI và kiểm tra thuộc khách hàng + còn hạn bảo hành | US-03 |
-| GET | /api/tickets/categories | Lấy danh sách nhóm sự cố đang hoạt động và mức ưu tiên mặc định để điền biểu mẫu | US-04 |
-| POST | /api/tickets/preview | Kiểm tra dữ liệu phiếu và trả mức ưu tiên, thời điểm tiếp nhận, hạn cam kết để xác nhận; không lưu phiếu | US-02, US-04, US-05 |
-| POST | /api/tickets | Tạo phiếu bảo hành mới bằng dữ liệu đã xác nhận, lưu nguyên thời điểm tiếp nhận và hạn cam kết từ bước xem trước | US-02, US-04, US-05 |
-| GET | /api/tickets?status={status} | Xem danh sách phiếu bảo hành | US-06 |
+## Danh sách endpoint
 
-Quy ước chung
+| Method | Endpoint | Mục đích |
+|:--:|---|---|
+| GET | `/api/customers?phone={phone}` | Tra cứu khách hàng theo số điện thoại |
+| GET | `/api/devices?serial={serial}&customer_id={customer_id}` | Tra cứu thiết bị, xác nhận chủ sở hữu và trả trạng thái bảo hành |
+| GET | `/api/tickets/categories` | Lấy danh mục sự cố và mức ưu tiên mặc định |
+| POST | `/api/tickets/preview` | Kiểm tra nghiệp vụ, tính hạn cam kết; không lưu phiếu |
+| POST | `/api/tickets` | Lưu phiếu cùng thời điểm và hạn đã xem trước |
+| GET | `/api/tickets?status={status}&page={page}&size={size}` | Xem danh sách phiếu, lọc trạng thái và phân trang |
 
-- Định dạng trao đổi: JSON, mã hoá UTF-8. Header bắt buộc: Content-Type:
-  application/json.
+## Quy ước chung
 
-- Tên trường dùng snake_case, khớp đúng tên cột trong cơ sở dữ liệu để
-  dễ truy vết.
+- API trao đổi JSON UTF-8. Request có body JSON gửi `Content-Type: application/json`; response JSON dùng `application/json`.
+- Tên trường request/response dùng `snake_case`.
+- Thời gian dùng chuỗi ISO 8601 có múi giờ, ví dụ `2026-09-08T14:30:00.000Z`.
+- Lỗi API dùng cấu trúc `{ "error": { "code": "...", "message": "...", "fields": {} } }`.
+- `GET /api/tickets` mặc định `page=1`, `size=20`; `size` tối đa 100. Response có `data`, `page`, `size`, `total`.
 
-- Thời gian dùng chuẩn ISO 8601 kèm múi giờ, ví dụ
-  2026-09-08T14:30:00+07:00.
+**Lỗi dùng chung**
 
-- Tiền tệ: số nguyên VND, không có phần thập phân, không có dấu phân
-  cách.
+| HTTP | Mã lỗi | Khi nào |
+|:--:|---|---|
+| 400 | `INVALID_JSON` | Body JSON không phân tích được |
+| 404 | `NOT_FOUND` | Đường dẫn API không tồn tại |
+| 500 | `INTERNAL_SERVER_ERROR` | Lỗi chưa được ánh xạ thành lỗi ứng dụng cụ thể |
 
-- Phân trang: tham số page (bắt đầu từ 1) và size (mặc định 20, tối đa
-  100). Response kèm total.
+## Chi tiết endpoint
 
-- Mọi lỗi trả về cùng một cấu trúc: { "error": { "code": "...",
-  "message": "...", "fields": {...} } }
+### GET /api/customers?phone={phone}
 
-Chi tiết endpoint
+Tra cứu hồ sơ khách hàng hiện có. Service chuẩn hóa số điện thoại bằng cách bỏ dấu cách, dấu chấm, dấu ngoặc và dấu gạch nối; dạng `84...` hoặc `+84...` được đổi về dạng bắt đầu bằng `0`. Số điện thoại phải có 10 chữ số.
 
-**GET /api/customers?phone={phone}**
+**Response 200 OK**
 
-**REQUEST**
-
-Query parameter:
-
-phone={phone}
-
-**RESPONSE 200 OK**
-
+```json
 {
-
-"customer_id": 1024,
-
-"full_name": "Nguyen Van A",
-
-"phone": "0901234567",
-
-"address": "..."
-
+  "customer_id": 1024,
+  "full_name": "Nguyen Van A",
+  "phone_masked": "090****567",
+  "address": "Can Tho"
 }
+```
 
-**RESPONSE 400 Bad Request — số điện thoại không hợp lệ**
+API chỉ trả `phone_masked`, không trả số điện thoại đầy đủ.
 
+**Lỗi có thể trả về**
+
+| HTTP | Mã lỗi | Khi nào |
+|:--:|---|---|
+| 400 | `INVALID_PHONE` | Số điện thoại thiếu hoặc sai định dạng; `fields.phone` mô tả lỗi |
+| 404 | `CUSTOMER_NOT_FOUND` | Không tìm thấy hồ sơ với số điện thoại đã chuẩn hóa |
+
+### GET /api/devices?serial={serial}&customer_id={customer_id}
+
+Tra cứu thiết bị theo serial/IMEI và kiểm tra thiết bị thuộc khách hàng đang chọn. Thiết bị hết hạn hoặc thiếu ngày mua vẫn được trả về để nhân viên tra cứu; `warranty_approved` sẽ là `false`. Bước xem trước tạo phiếu mới từ chối các thiết bị này. Tên `warranty_approved` hiện được dùng để biểu diễn kết quả kiểm tra bảo hành: `true` là còn hạn, `false` là hết hạn hoặc chưa xác minh.
+
+**Response 200 OK — còn hạn bảo hành**
+
+```json
 {
-
-"error": {
-
-"code": "INVALID_PHONE",
-
-"message": "Số điện thoại không hợp lệ",
-
-"fields": {
-
-"phone": "Số điện thoại phải có định dạng hợp lệ"
-
+  "device_id": 3311,
+  "customer_id": 1024,
+  "serial_no": "SN123456789",
+  "purchase_date": "2025-03-15",
+  "warranty_approved": true
 }
+```
 
-}
+Với thiết bị hết hạn hoặc thiếu `purchase_date`, response vẫn có cùng cấu trúc nhưng `warranty_approved` là `false` và `purchase_date` có thể là `null`.
 
-}
+**Lỗi có thể trả về**
 
-**RESPONSE 404 Not Found — Không tìm thấy khách hàng**
+| HTTP | Mã lỗi | Khi nào |
+|:--:|---|---|
+| 400 | `VALIDATION_FAILED` | `serial` trống hoặc `customer_id` không phải số nguyên dương; chi tiết ở `error.fields` |
+| 404 | `CUSTOMER_NOT_FOUND` | Không tìm thấy khách hàng |
+| 404 | `DEVICE_NOT_FOUND` | Không tìm thấy thiết bị theo serial/IMEI |
+| 422 | `DEVICE_CUSTOMER_MISMATCH` | Thiết bị không thuộc khách hàng đang chọn; `fields.serial` mô tả lỗi |
 
-**GET /api/devices?serial={serial} &customer_id={customer_id}**
+### GET /api/tickets/categories
 
-**REQUEST**
+Không cần query hoặc body. Trả danh mục sự cố đang hoạt động cùng mức ưu tiên mặc định.
 
-QUERY PARAM
-
-serial=SN123456789&customer_id=1024
-
-**RESPONSE 200 OK**
-
-{
-
-"device_id": 3311,
-
-"customer_id": 1024,
-
-"serial_no": "SN123456789",
-
-"purchase_date": "2025-03-15"
-
-}
-
-**RESPONSE 400 Bad Request — mã khách hàng không hợp lệ**
-
-{
-
-"error": {
-
-"code": "VALIDATION_FAILED",
-
-"message": "Dữ liệu không hợp lệ",
-
-"fields": {
-
-"serial": "Trường bắt buộc, không được để trống",
-
-"customer_id": "Phải là số nguyên dương"
-
-}
-
-}
-
-}
-
-**RESPONSE 404 Not Found — Không tìm thấy thiết bị/ Không tìm thấy khách
-hàng**
-
-**GET /api/tickets/categories**
-
-Không cần request body. Trả về danh sách nhóm sự cố đang hoạt động, kèm mức ưu tiên mặc định để giao diện tự chọn khi người dùng chọn nhóm.
-
-**RESPONSE 200 OK**
+**Response 200 OK**
 
 ```json
 [
@@ -134,11 +92,24 @@ Không cần request body. Trả về danh sách nhóm sự cố đang hoạt đ
 ]
 ```
 
-**POST /api/tickets/preview**
+### POST /api/tickets/preview
 
-Nhận các trường đầu vào giống phần tạo phiếu bên dưới, ngoại trừ `received_at` và `due_date`. Endpoint kiểm tra khách hàng, thiết bị, nhóm sự cố và điều kiện tiếp nhận; sinh mức ưu tiên cuối cùng, `received_at` và `due_date` để hiển thị trên màn hình xác nhận. Endpoint này không ghi dữ liệu.
+Kiểm tra dữ liệu và điều kiện nghiệp vụ trước khi hiện màn hình xác nhận. Không ghi phiếu hoặc log vào cơ sở dữ liệu. Request gồm `customer_id`, `device_id`, `center_id`, `issue_desc`, `category_id`; `priority` có thể bỏ qua để dùng mức mặc định của danh mục. Không gửi `received_at` và `due_date` ở bước này.
 
-**RESPONSE 200 OK**
+**Request body**
+
+```json
+{
+  "customer_id": 1024,
+  "device_id": 3311,
+  "center_id": 0,
+  "issue_desc": "Máy sạc không vào, cắm sạc báo lỗi",
+  "category_id": 1,
+  "priority": "TRUNG_BINH"
+}
+```
+
+**Response 200 OK**
 
 ```json
 {
@@ -149,208 +120,82 @@ Nhận các trường đầu vào giống phần tạo phiếu bên dưới, ngo
 }
 ```
 
-**POST /api/tickets**
+**Lỗi có thể trả về**
 
-**REQUEST BODY**
+| HTTP | Mã lỗi | Khi nào |
+|:--:|---|---|
+| 400 | `VALIDATION_FAILED` | Trường bắt buộc sai/thiếu hoặc dữ liệu đầu vào sai định dạng |
+| 404 | `CUSTOMER_NOT_FOUND`, `DEVICE_NOT_FOUND` | Không tìm thấy khách hàng hoặc thiết bị |
+| 409 | `TICKET_CONFLICT` | Thiết bị đang có phiếu chưa đóng |
+| 422 | `DEVICE_CUSTOMER_MISMATCH` | Thiết bị không thuộc khách hàng đã chọn |
+| 422 | `WARRANTY_NOT_APPROVED` | Thiết bị hết hạn hoặc chưa xác minh bảo hành |
 
+### POST /api/tickets
+
+Lưu phiếu sau khi người dùng xác nhận. Các trường đầu vào giống preview và phải gửi thêm `received_at`, `due_date` nhận từ response preview. Server kiểm tra hai mốc thời gian rồi lưu nguyên giá trị đã xác nhận, không tính hạn cam kết lần nữa.
+
+Việc thêm phiếu và log trạng thái ban đầu nằm trong cùng transaction. Log khởi tạo có `from_status = NULL`, `to_status = 'MOI'`, `changed_at = received_at`; `changed_by = 0` đại diện tác nhân hệ thống trong luồng hiện chưa có danh tính nhân viên.
+
+**Response 201 Created**
+
+```json
 {
-
-"customer_id": 1024,
-
-"device_id": 3311,
-
-"center_id": 2,
-
-"issue_desc": "Máy sạc không vào, cắm sạc báo lỗi",
-
-"category_id": 1,
-
-"priority": "TRUNG_BINH",
-
-"received_at": "2026-09-08T14:30:00.000Z",
-
-"due_date": "2026-09-11T14:30:00.000Z"
-
+  "ticket_id": 88231,
+  "ticket_code": "BH-000231/2026",
+  "status": "MOI",
+  "category_id": 1,
+  "priority": "TRUNG_BINH",
+  "received_at": "2026-09-08T14:30:00.000Z",
+  "due_date": "2026-09-11T14:30:00.000Z"
 }
+```
 
-`received_at` và `due_date` là hai giá trị server trả về ở bước xem trước. Khi xác nhận, client gửi lại hai giá trị này; server kiểm tra định dạng và thứ tự thời gian rồi lưu chúng mà không sinh lại hạn cam kết.
+**Lỗi có thể trả về**
 
-Việc tạo phiếu và ghi trạng thái ban đầu vào `ticket_status_log` nằm trong cùng transaction. Dòng khởi tạo có `from_status = NULL`, `to_status = 'MOI'`, `changed_at = received_at`; do L2 chưa có danh tính nhân viên, `changed_by = 0` được dành làm mã tác nhân hệ thống.
+Ngoài các lỗi `VALIDATION_FAILED`, `CUSTOMER_NOT_FOUND`, `DEVICE_NOT_FOUND`, `TICKET_CONFLICT`, `DEVICE_CUSTOMER_MISMATCH` và `WARRANTY_NOT_APPROVED` như endpoint preview, lỗi dữ liệu đầu vào còn có thể chỉ ra từng trường như `received_at` hoặc `due_date`. Request hợp lệ nhưng lỗi hệ thống không dự kiến trả `500 INTERNAL_SERVER_ERROR` theo cấu trúc lỗi chung.
 
-**RESPONSE 201 Created**
+### GET /api/tickets?status={status}&page={page}&size={size}
 
+Các query đều tùy chọn. `status` nếu có phải là một trong `MOI`, `DA_PHAN_CONG`, `DANG_XU_LY`, `CHO_LINH_KIEN`, `HOAN_TAT`, `DA_DONG`. Kết quả được sắp xếp theo thời điểm nhận mới nhất.
+
+**Response 200 OK**
+
+```json
 {
-
-"ticket_id": 88231,
-
-"ticket_code": "BH-000231/2026",
-
-"status": "MOI",
-
-"category_id": 1,
-
-"priority": "TRUNG_BINH",
-
-"received_at": "2026-09-08T14:30:00+07:00",
-
-"due_date": "2026-09-11T14:30:00+07:00"
-
+  "data": [
+    {
+      "ticket_id": 88231,
+      "ticket_code": "BH-000231/2026",
+      "customer_id": 1024,
+      "customer_name": "Nguyen Van A",
+      "device_id": 3311,
+      "serial_no": "SN123456789",
+      "status": "MOI",
+      "priority": "TRUNG_BINH",
+      "category_name": "Sạc",
+      "received_at": "2026-09-08T14:30:00.000Z",
+      "due_date": "2026-09-11T14:30:00.000Z"
+    }
+  ],
+  "page": 1,
+  "size": 20,
+  "total": 1
 }
-
-**RESPONSE 400 Bad Request — dữ liệu không hợp lệ**
-
-{
-
-"error": {
-
-"code": "VALIDATION_FAILED",
-
-"message": "Dữ liệu không hợp lệ",
-
-"fields": {
-
-"issue_desc": "Trường bắt buộc, không được để trống"
-
-}
-
-}
-
-}
-
-**RESPONSE 404 Not Found — Không tìm thấy khách hàng hoặc thiết bị**
-
-**RESPONSE 409 Conflict — Thiết bị đang có phiếu chưa đóng**
-
-**RESPONSE 422 Unprocessable Entity — Thiết bị hết bảo hành, chưa được
-phê duyệt**
-
-**GET /api/tickets?status={status}**
-
-**REQUEST**
-
-**QUERY PARAM**
-
-status=MOI
-
-**RESPONSE 200 OK**
-
-{
-
-"data": \[
-
-{
-
-"ticket_id": 88231,
-
-"ticket_code": "BH-000231/2026",
-
-"customer_id": 1024,
-
-"customer_name": "Nguyen Van A",
-
-"device_id": 3311,
-
-"serial_no": "SN123456789",
-
-"status": "MOI",
-
-"priority": "TRUNG_BINH",
-
-"category_name": "Sạc",
-
-"received_at": "2026-09-08T14:30:00+07:00",
-
-"due_date": "2026-09-11T14:30:00+07:00"
-
-},
-
-{
-
-"ticket_id": 88232,
-
-"ticket_code": "BH-000232/2026",
-
-"customer_id": 1025,
-
-"customer_name": "Tran Thi B",
-
-"device_id": 3312,
-
-"serial_no": "SN987654321",
-
-"status": "MOI",
-
-"priority": "CAO",
-
-"category_name": "Màn hình",
-
-"received_at": "2026-09-08T15:00:00+07:00",
-
-"due_date": "2026-09-09T15:00:00+07:00"
-
-}
-
-\],
-
-"page": 1,
-
-"size": 20,
-
-"total": 2
-
-}
-
-**RESPONSE 400 Bad Request**
-
-{
-
-"error": {
-
-"code": "INVALID_STATUS",
-
-"message": "Trạng thái phiếu bảo hành không hợp lệ",
-
-"fields": {
-
-"status": "Giá trị trạng thái không được hỗ trợ"
-
-}
-
-}
-
-}
-
-**Bảng validation**
-
-**GET /api/customers?phone={phone}**
-
-| **Trường** | **Bắt buộc** | **Kiểu / ràng buộc** | **Thông báo lỗi khi vi phạm** |
-|:--:|----|----|----|
-| phone | Có | Chuỗi; chuẩn hóa về 10 chữ số, bắt đầu bằng 0 theo QT-02 | Số điện thoại không hợp lệ |
-
-**POST /api/devices?serial={serial} &customer_id={customer_id}**
-
-| **Trường** | **Bắt buộc** | **Kiểu / ràng buộc** | **Thông báo lỗi khi vi phạm** |
-|:--:|----|----|----|
-| customer_id | Có | Số nguyên dương, là customer_id | Mã khách hàng không hợp lệ |
-| serial | có | Chuỗi là serial_no | Mã thiết bị không hợp lệ |
-
-**POST /api/tickets**
-
-| **Trường** | **Bắt buộc** | **Kiểu / ràng buộc** | **Thông báo lỗi khi vi phạm** |
-|:--:|----|----|----|
-| customer_id | Có | Số nguyên dương, phải tồn tại trong bảng customer | Không tìm thấy khách hàng |
-| device_id | Có | Số nguyên dương, phải thuộc về customer_id theo QT-03 | Thiết bị không thuộc về khách hàng này |
-| issue_desc | Có | Chuỗi, không được để trống | Mô tả lỗi không được để trống |
-| category_id | Có | Số nguyên dương, phải tồn tại trong bảng issue_category | Nhóm sự cố không hợp lệ |
-| priority | không | Một trong CAO / TRUNG_BINH / THAP. Mặc định mức ưu tiên theo nhóm sự cố | Mức ưu tiên không hợp lệ |
-
-**GET /api/tickets?status={status}**
-
-| **Trường** | **Bắt buộc** | **Kiểu / ràng buộc** | **Thông báo lỗi khi vi phạm** |
-|:--:|----|----|----|
-| status | Không | Một trong MOI/ DA_PHAN_CONG/ DANG_XU_LY/ CHO_LINH_KIEN/ HOAN_TAT/ DA_DONG | Trạng thái phiếu bảo hành không hợp lệ |
-| page | Không | Số nguyên dương; mặc định 1 | Phải là số nguyên dương |
-| size | Không | Số nguyên từ 1 đến 100; mặc định 20 | Phải là số nguyên từ 1 đến 100 |
-
-Tham số `page` hoặc `size` không hợp lệ trả HTTP 400 với mã `INVALID_PAGE_SIZE`; trường sai được nêu trong `error.fields`.
+```
+
+**Lỗi có thể trả về**
+
+| HTTP | Mã lỗi | Khi nào |
+|:--:|---|---|
+| 400 | `INVALID_STATUS` | Trạng thái không thuộc danh sách hỗ trợ; lỗi ở `fields.status` |
+| 400 | `INVALID_PAGE_SIZE` | `page` không phải số nguyên dương hoặc `size` ngoài 1–100; trường sai nằm trong `fields` |
+
+## Tóm tắt validation theo endpoint
+
+| Endpoint | Trường/điều kiện chính | Nơi kiểm tra hiện tại |
+|---|---|---|
+| `GET /api/customers` | `phone` được chuẩn hóa và phải là số 10 chữ số bắt đầu bằng 0 | `customerService` |
+| `GET /api/devices` | `serial` không trống; `customer_id` là số nguyên dương; thiết bị thuộc khách hàng | Validator và `deviceService` |
+| `POST /api/tickets/preview` | ID là số nguyên hợp lệ; `center_id` không âm; mô tả lỗi không trống; ưu tiên hợp lệ nếu được gửi | Validator; điều kiện tồn tại/sở hữu/bảo hành ở service |
+| `POST /api/tickets` | Các trường preview và `received_at`, `due_date` hợp lệ; hạn phải sau thời điểm nhận | Validator; điều kiện nghiệp vụ ở service |
+| `GET /api/tickets` | Trạng thái hợp lệ; `page` dương; `size` từ 1 đến 100 | Validator |

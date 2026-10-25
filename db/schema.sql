@@ -1,7 +1,7 @@
 -- =========================================
 -- SMART CRM - MEKONG MOBILE
 -- L2: TIẾP NHẬN VÀ PHÂN LOẠI YÊU CẦU BẢO HÀNH
--- PostgreSQL DDL SKELETON
+-- PostgreSQL schema for the L2 module.
 -- =========================================
 
 
@@ -9,7 +9,7 @@
 -- 1. CUSTOMER
 -- =========================================
 
-CREATE TABLE customer (
+CREATE TABLE IF NOT EXISTS customer (
     customer_id     BIGSERIAL PRIMARY KEY,
     full_name       VARCHAR(120) NOT NULL,
     phone           VARCHAR(20) NOT NULL UNIQUE,
@@ -35,7 +35,7 @@ CREATE TABLE customer (
 -- 2. DEVICE
 -- =========================================
 
-CREATE TABLE device (
+CREATE TABLE IF NOT EXISTS device (
     device_id        BIGSERIAL PRIMARY KEY,
     customer_id      BIGINT NOT NULL,
     product_id       BIGINT NOT NULL,
@@ -56,7 +56,7 @@ CREATE TABLE device (
 -- 3. ISSUE CATEGORY
 -- =========================================
 
-CREATE TABLE issue_category (
+CREATE TABLE IF NOT EXISTS issue_category (
     category_id       SERIAL PRIMARY KEY,
     category_name     VARCHAR(60) NOT NULL UNIQUE,
     default_priority  VARCHAR(10) NOT NULL,
@@ -77,7 +77,7 @@ CREATE TABLE issue_category (
 -- 4. TICKET
 -- =========================================
 
-CREATE TABLE ticket (
+CREATE TABLE IF NOT EXISTS ticket (
     ticket_id       BIGSERIAL PRIMARY KEY,
     ticket_code     VARCHAR(20) NOT NULL UNIQUE,
 
@@ -138,7 +138,7 @@ CREATE TABLE ticket (
 -- 5. TICKET STATUS LOG
 -- =========================================
 
-CREATE TABLE ticket_status_log (
+CREATE TABLE IF NOT EXISTS ticket_status_log (
     log_id        BIGSERIAL PRIMARY KEY,
 
     ticket_id     BIGINT NOT NULL,
@@ -170,15 +170,15 @@ CREATE TABLE ticket_status_log (
 );
 
 -- Tra cứu khách hàng theo số điện thoại
-CREATE INDEX idx_customer_phone
+CREATE INDEX IF NOT EXISTS idx_customer_phone
     ON customer(phone);
 
 
 -- Xem danh sách phiếu theo trạng thái và hạn cam kết
-CREATE INDEX idx_ticket_status_due
+CREATE INDEX IF NOT EXISTS idx_ticket_status_due
     ON ticket(status, due_date);
 
 
 -- Tra cứu lịch sử trạng thái của một phiếu
-CREATE INDEX idx_ticket_status_log_ticket
+CREATE INDEX IF NOT EXISTS idx_ticket_status_log_ticket
     ON ticket_status_log(ticket_id);

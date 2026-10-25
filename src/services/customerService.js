@@ -23,6 +23,13 @@ export default class DichVuKhachHang {
     const khachHang = await this.khoKhachHang.timTheoSoDienThoai(soDaChuanHoa);
     if (!khachHang)
       throw new LoiUngDung("CUSTOMER_NOT_FOUND", "Không tìm thấy khách hàng.");
-    return khachHang;
+
+    const soDienThoaiDaChe = `${khachHang.phone.slice(0, 3)}****${khachHang.phone.slice(-3)}`;
+    return {
+      customer_id: khachHang.customer_id,
+      full_name: khachHang.full_name,
+      phone_masked: soDienThoaiDaChe,
+      address: khachHang.address,
+    };
   }
 }

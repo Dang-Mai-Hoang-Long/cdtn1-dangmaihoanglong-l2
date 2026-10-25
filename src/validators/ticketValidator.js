@@ -92,8 +92,11 @@ export function kiemTraDuLieuTaoPhieu(
   const ketQua = {};
   for (const tenTruong of cacTruongSo) {
     const giaTri = Number(duLieu[tenTruong]);
-    if (!Number.isSafeInteger(giaTri) || giaTri < 1)
-      loiTheoTruong[tenTruong] = "Phải là số nguyên dương";
+    const giaTriNhoNhat = tenTruong === "center_id" ? 0 : 1;
+    if (!Number.isSafeInteger(giaTri) || giaTri < giaTriNhoNhat)
+      loiTheoTruong[tenTruong] = tenTruong === "center_id"
+        ? "Phải là số nguyên không âm"
+        : "Phải là số nguyên dương";
     else ketQua[tenTruong] = giaTri;
   }
   if (typeof duLieu.issue_desc !== "string" || !duLieu.issue_desc.trim()) {

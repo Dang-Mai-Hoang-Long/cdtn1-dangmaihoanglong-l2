@@ -6,8 +6,17 @@ function dinhDangThoiGian(giaTri) {
   }).format(new Date(giaTri));
 }
 
+function cheSoDienThoai(soDienThoai) {
+  let soDaChuanHoa = String(soDienThoai || "").replace(/\D/g, "");
+  if (soDaChuanHoa.length === 11 && soDaChuanHoa.startsWith("84")) {
+    soDaChuanHoa = `0${soDaChuanHoa.slice(2)}`;
+  }
+  if (soDaChuanHoa.length !== 10) return "—";
+  return `${soDaChuanHoa.slice(0, 3)}****${soDaChuanHoa.slice(-3)}`;
+}
+
 export default function XacNhanPhieu({
-  phieu,
+  phieuXemTruoc,
   thongBao,
   dangXuLy,
   khiQuayLai,
@@ -22,21 +31,23 @@ export default function XacNhanPhieu({
       <section className="khungXacNhan">
         <dl className="nhomThongTin nhomThongTinKhachHang">
           <dt>Số điện thoại khách hàng</dt>
-          <dd>{phieu?.phone || "—"}</dd>
+          <dd>
+            {phieuXemTruoc?.phone_masked || cheSoDienThoai(phieuXemTruoc?.phone)}
+          </dd>
           <dt>Họ tên khách hàng</dt>
-          <dd>{phieu?.full_name || "—"}</dd>
+          <dd>{phieuXemTruoc?.full_name || "—"}</dd>
           <dt>Số serial thiết bị</dt>
-          <dd>{phieu?.serial_no || "—"}</dd>
+          <dd>{phieuXemTruoc?.serial_no || "—"}</dd>
           <dt>Mô tả lỗi</dt>
-          <dd>{phieu?.issue_desc || "—"}</dd>
+          <dd>{phieuXemTruoc?.issue_desc || "—"}</dd>
           <dt>Nhóm sự cố</dt>
-          <dd>{phieu?.category_name || "—"}</dd>
+          <dd>{phieuXemTruoc?.category_name || "—"}</dd>
           <dt>Mức ưu tiên</dt>
-          <dd>{nhanUuTien[phieu?.priority] || "—"}</dd>
+          <dd>{nhanUuTien[phieuXemTruoc?.priority] || "—"}</dd>
         </dl>
         <dl className="nhomThongTin nhomThongTinHan">
           <dt>Hạn cam kết dự kiến</dt>
-          <dd>{dinhDangThoiGian(phieu?.due_date)}</dd>
+          <dd>{dinhDangThoiGian(phieuXemTruoc?.due_date)}</dd>
         </dl>
         {thongBao && (
           <div className="canhBaoBaoHanh coThongBao" role="alert">
@@ -58,7 +69,7 @@ export default function XacNhanPhieu({
             onClick={khiXacNhan}
             disabled={dangXuLy}
           >
-            {dangXuLy ? "Đang tạo…" : "Xác nhận"}
+            Xác nhận
           </button>
         </div>
       </section>

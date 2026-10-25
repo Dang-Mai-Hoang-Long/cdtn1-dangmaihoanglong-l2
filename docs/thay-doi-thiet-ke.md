@@ -41,3 +41,28 @@
 - Lý do : Trường changed_by phục vụ cho QT-06 để truy vết hành động của người dùng khi trạng thái phiếu thay đổi.
 - Ảnh hưởng : Tạm thời lược bỏ khóa ngoại của trường changed_by trong phiên bản này. Xóa thiết lập khóa ngoại trong SQL DDL skeleton của trường changed_by.
 - File thay đổi: schema.sql.
+
+## Bổ sung khi hiện thực BT2
+
+### TD-06 Tách migration và seed thành các tệp SQL có thứ tự
+
+- Sinh viên tự đánh giá : DDL ban đầu nằm trong một tệp tổng hợp, chưa có runner theo dõi migration và quy trình riêng để nạp dữ liệu mẫu.
+- Quyết định : SỬA
+- Lý do : BT2 và tài liệu Buổi 7 yêu cầu dựng được cơ sở dữ liệu từ trạng thái trống, có dữ liệu mẫu và chạy lại được.
+- Ảnh hưởng : Tách DDL thành các migration đánh số; thêm runner ghi nhận migration đã chạy; thêm seed dữ liệu mẫu có thể chạy lại và các lệnh `db:migrate`, `db:seed`, `db:setup`.
+- File thay đổi: `migrations/`, `seeds/001_seed_demo.sql`, `scripts/migrate.js`, `scripts/seed.js`, `package.json`, `README.md`.
+
+### TD-07 Cập nhật hợp đồng API theo endpoint đang triển khai
+
+- Sinh viên tự đánh giá : Hợp đồng API mô tả chưa đúng response tra cứu khách hàng/thiết bị và chưa liệt kê đầy đủ quy tắc phân trang cùng các lỗi trả về.
+- Quyết định : SỬA
+- Lý do : Tài liệu API cần khớp với route, validator, service và dữ liệu mà frontend đang sử dụng để người tích hợp có thể dựa vào một hợp đồng thống nhất.
+- Ảnh hưởng : Cập nhật tài liệu cho các API đã được triển khai, không thêm endpoint mới và không thay đổi hành vi backend:
+  - `GET /api/customers?phone={phone}`: mô tả dữ liệu khách hàng trả về với số điện thoại đã che trong trường `phone_masked`.
+  - `GET /api/devices?serial={serial}&customer_id={customer_id}`: mô tả việc tra cứu thiết bị theo số serial và khách hàng, cùng trạng thái bảo hành trả về trong `warranty_approved`.
+  - `GET /api/tickets/categories`: mô tả danh sách nhóm sự cố và mức ưu tiên mặc định.
+  - `POST /api/tickets/preview`: mô tả request kiểm tra trước khi tạo phiếu, response xem trước gồm thông tin phân loại và hạn cam kết; API này không lưu phiếu.
+  - `POST /api/tickets`: mô tả request xác nhận tạo phiếu và response sau khi lưu, sử dụng thời điểm tiếp nhận và hạn cam kết đã xem trước.
+  - `GET /api/tickets?status={status}&page={page}&size={size}`: mô tả lọc danh sách theo trạng thái, phân trang, cấu trúc response và giá trị mặc định/giới hạn phân trang.
+  - Bổ sung, làm rõ cấu trúc lỗi và mã lỗi áp dụng cho các API trên.
+- File thay đổi: `docs/api-contract.md`.

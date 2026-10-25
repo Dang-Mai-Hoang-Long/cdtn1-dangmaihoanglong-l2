@@ -13,6 +13,7 @@ const cacManHinh = {
 const khoaBanNhap = "banNhapTaoPhieuBaoHanh.v1";
 const duLieuPhieuRong = {
   phone: "",
+  phone_masked: "",
   full_name: "",
   customer_id: null,
   serial_no: "",
@@ -78,7 +79,7 @@ export default function UngDung() {
   const [danhMuc, datDanhMuc] = useState([]);
   const [dangXuLy, datDangXuLy] = useState(false);
   const [dangTraCuuThietBi, datDangTraCuuThietBi] = useState(false);
-  const [ketQuaTao, datKetQuaTao] = useState(null);
+  const [phieuXemTruoc, datPhieuXemTruoc] = useState(null);
 
   useEffect(() => {
     const coDuLieu = Boolean(
@@ -137,7 +138,12 @@ export default function UngDung() {
       ...duLieuCu,
       [tenTruong]: giaTri,
       ...(tenTruong === "phone"
-        ? { customer_id: null, full_name: "", device_id: null }
+        ? {
+            customer_id: null,
+            phone_masked: "",
+            full_name: "",
+            device_id: null,
+          }
         : {}),
       ...(tenTruong === "serial_no" ? { device_id: null } : {}),
       ...(tenTruong === "category_id" ? { priority: mucUuTienMacDinh } : {}),
@@ -155,7 +161,9 @@ export default function UngDung() {
         ...duLieuCu,
         customer_id: khachHang.customer_id,
         full_name: khachHang.full_name,
-        phone: khachHang.phone,
+        // Giữ số nhân viên đã nhập; API chỉ trả phone_masked.
+        phone: duLieuCu.phone,
+        phone_masked: khachHang.phone_masked,
         device_id: null,
       }));
     } catch (loi) {
@@ -234,7 +242,7 @@ export default function UngDung() {
     return {
       customer_id: phieu.customer_id,
       device_id: phieu.device_id,
-      center_id: Number(import.meta.env.VITE_DEFAULT_CENTER_ID || 2),
+      center_id: 0,
       issue_desc: phieu.issue_desc,
       category_id: Number(phieu.category_id),
       ...(phieu.priority ? { priority: phieu.priority } : {}),
@@ -243,7 +251,7 @@ export default function UngDung() {
     };
   }
 
-  async function guiBieuMau(suKien) {
+  async function kiemTraVaXemTruoc(suKien) {
     suKien.preventDefault();
     const loiMoi = {};
     if (!duLieuPhieu.customer_id)
@@ -265,10 +273,10 @@ export default function UngDung() {
     datLoiTruong({});
     datDangXuLy(true);
     try {
-      const xemTruoc = await phieuApi.xemTruocTaoMoi(lapDuLieuGui(duLieuPhieu));
-      datKetQuaTao({
+      const ketQuaXemTruoc = await phieuApi.xemTruocTaoPhieu(lapDuLieuGui(duLieuPhieu));
+      datPhieuXemTruoc({
         ...duLieuPhieu,
-        ...xemTruoc,
+        ...ketQuaXemTruoc,
         category_name: danhMuc.find(
           (muc) => Number(muc.category_id) === Number(duLieuPhieu.category_id),
         )?.category_name,
@@ -299,14 +307,14 @@ export default function UngDung() {
   }
 
   async function xacNhanTaoPhieu() {
-    if (!ketQuaTao || dangXuLy) return;
+    if (!phieuXemTruoc || dangXuLy) return;
     datDangXuLy(true);
     datThongBao("");
     try {
-      await phieuApi.taoMoi(lapDuLieuGui(ketQuaTao));
+      await phieuApi.xacNhanTaoPhieu(lapDuLieuGui(phieuXemTruoc));
       xoaBanNhap();
       datDuLieuPhieu(duLieuPhieuRong);
-      datKetQuaTao(null);
+      datPhieuXemTruoc(null);
       chuyenManHinh("danhSach");
     } catch (loi) {
       datThongBao(loi.message || "Không thể tạo phiếu ngay lúc này.");
@@ -339,12 +347,12 @@ export default function UngDung() {
           khiThayDoi={thayDoiTruong}
           khiTraCuuKhachHang={traCuuKhachHang}
           khiHuy={huyBieuMau}
-          khiGui={guiBieuMau}
+          khiXemTruoc={kiemTraVaXemTruoc}
         />
       )}
       {manHinhHienTai === "xacNhan" && (
         <XacNhanPhieu
-          phieu={ketQuaTao}
+          phieuXemTruoc={phieuXemTruoc}
           thongBao={thongBao}
           dangXuLy={dangXuLy}
           khiQuayLai={() => chuyenManHinh("taoPhieu")}

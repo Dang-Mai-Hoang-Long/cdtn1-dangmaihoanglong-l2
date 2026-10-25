@@ -1,5 +1,5 @@
 import LoiUngDung from "../errors/AppError.js";
-import { conHanBaoHanh, duocTiepNhanBaoHanh } from "./warrantyRules.js";
+import { conHanBaoHanh } from "./warrantyRules.js";
 
 export default class DichVuThietBi {
   constructor(khoThietBi, khoKhachHang) {
@@ -8,11 +8,11 @@ export default class DichVuThietBi {
   }
 
   /**
-   * Tra cứu thiết bị và kiểm tra quan hệ với khách hàng cùng điều kiện bảo hành.
+   * Tra cứu thiết bị, kiểm tra chủ sở hữu và trả trạng thái bảo hành để giao diện hiển thị.
    * @param {string} soSerial Serial/IMEI cần tìm.
    * @param {number} maKhachHang Mã khách hàng đang được chọn trên biểu mẫu.
    * @returns {Promise<object>} Thông tin thiết bị và kết quả bảo hành để hiển thị.
-   * @throws {LoiUngDung} Khi khách hàng/thiết bị không tồn tại, không khớp hoặc không được tiếp nhận.
+   * @throws {LoiUngDung} Khi khách hàng/thiết bị không tồn tại hoặc thiết bị không thuộc khách hàng.
    */
   async timTheoSerial(soSerial, maKhachHang) {
     if (!(await this.khoKhachHang.tonTai(maKhachHang))) {
@@ -31,14 +31,6 @@ export default class DichVuThietBi {
       );
     }
     const duocBaoHanh = conHanBaoHanh(thietBi);
-    const choPhepHetHan =
-      process.env.ALLOW_EXPIRED_WARRANTY_TICKETS !== "false";
-    if (!duocTiepNhanBaoHanh(thietBi, choPhepHetHan)) {
-      throw new LoiUngDung(
-        "WARRANTY_NOT_APPROVED",
-        "Thiết bị hết hạn hoặc chưa xác minh bảo hành; cần quản lý phê duyệt.",
-      );
-    }
     return {
       device_id: thietBi.device_id,
       customer_id: thietBi.customer_id,

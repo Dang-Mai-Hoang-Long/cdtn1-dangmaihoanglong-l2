@@ -7,7 +7,7 @@ import xuLyLoiApi from './errors/errorHandler.js';
 import KhoPhieu from './repositories/ticketRepository.js';
 import KhoKhachHang from './repositories/customerRepository.js';
 import KhoThietBi from './repositories/deviceRepository.js';
-import taoTuyenPhieu from './routes/TicketRoute.js';
+import taoTuyenPhieu from './routes/ticketRoute.js';
 import taoTuyenKhachHang from './routes/customerRoute.js';
 import taoTuyenThietBi from './routes/deviceRoute.js';
 import DichVuPhieu from './services/ticketService.js';

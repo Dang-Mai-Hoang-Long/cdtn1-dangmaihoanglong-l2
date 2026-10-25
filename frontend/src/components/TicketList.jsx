@@ -1,6 +1,15 @@
 import { useEffect, useState } from "react";
 import { phieuApi } from "../api/tickets.api.js";
 
+const tenTrangThai = {
+  MOI: "Mới",
+  DA_PHAN_CONG: "Đã phân công",
+  DANG_XU_LY: "Đang xử lý",
+  CHO_LINH_KIEN: "Chờ linh kiện",
+  HOAN_TAT: "Hoàn tất",
+  DA_DONG: "Đã đóng",
+};
+
 export default function DanhSachPhieu({ khiTaoPhieu }) {
   const [cacPhieu, datCacPhieu] = useState([]);
   const [dangTai, datDangTai] = useState(true);
@@ -12,6 +21,7 @@ export default function DanhSachPhieu({ khiTaoPhieu }) {
   const [tongSo, datTongSo] = useState(0);
 
   const tongSoTrang = Math.max(1, Math.ceil(tongSo / kichThuoc));
+  const trangVuotQuaCuoi = trang > tongSoTrang;
 
   useEffect(() => {
     const boDieuKhien = new AbortController();
@@ -136,9 +146,46 @@ export default function DanhSachPhieu({ khiTaoPhieu }) {
                     </td>
                   </tr>
                 )}
-                {!dangTai && !loiTai && cacPhieu.length === 0 && (
+                {!dangTai && !loiTai && trangVuotQuaCuoi && (
+                  <tr>
+                    <td colSpan="8" role="status">
+                      Danh sách vừa thay đổi. Đang chuyển về trang có dữ liệu...
+                    </td>
+                  </tr>
+                )}
+                {!dangTai && !loiTai && !trangVuotQuaCuoi && cacPhieu.length === 0 && tongSo === 0 && !trangThaiLoc && (
                   <tr>
                     <td colSpan="8">Chưa có phiếu bảo hành nào.</td>
+                  </tr>
+                )}
+                {!dangTai && !loiTai && !trangVuotQuaCuoi && cacPhieu.length === 0 && tongSo === 0 && trangThaiLoc && (
+                  <tr>
+                    <td colSpan="8">
+                      Không tìm thấy phiếu ở trạng thái {tenTrangThai[trangThaiLoc] || trangThaiLoc}.{" "}
+                      <button
+                        className="nut nutPhu"
+                        type="button"
+                        onClick={() => {
+                          datTrangThaiLoc("");
+                          datTrang(1);
+                        }}
+                      >
+                        Xóa bộ lọc
+                      </button>
+                    </td>
+                  </tr>
+                )}
+                {!dangTai && !loiTai && !trangVuotQuaCuoi && cacPhieu.length === 0 && tongSo > 0 && (
+                  <tr>
+                    <td colSpan="8" role="status">
+                      Trang này hiện chưa có dòng dữ liệu dù còn {tongSo} phiếu phù hợp. Bạn có thể tải lại danh sách.{" "}
+                      <button
+                        type="button"
+                        onClick={() => datSoLanTaiLai((lan) => lan + 1)}
+                      >
+                        Tải lại
+                      </button>
+                    </td>
                   </tr>
                 )}
                 {!dangTai &&

@@ -8,7 +8,7 @@ export default function BieuMauPhieu({
   khiThayDoi,
   khiTraCuuKhachHang,
   khiHuy,
-  khiGui,
+  khiXemTruoc,
 }) {
   function doiTruong(suKien) {
     khiThayDoi(suKien.target.name, suKien.target.value);
@@ -19,7 +19,7 @@ export default function BieuMauPhieu({
       <header className="tieuDeManHinh">
         <h1>Tạo phiếu bảo hành</h1>
       </header>
-      <form className="bieuMau" onSubmit={khiGui} noValidate>
+      <form className="bieuMau" onSubmit={khiXemTruoc} noValidate>
         <div className="truongHang truongTraCuu">
           <label htmlFor="so-dien-thoai">Số điện thoại khách hàng</label>
           <div>
@@ -179,11 +179,7 @@ export default function BieuMauPhieu({
             type="submit"
             disabled={dangXuLy || dangTraCuuThietBi}
           >
-            {dangXuLy
-              ? "Đang tạo…"
-              : dangTraCuuThietBi
-                ? "Đang kiểm tra…"
-                : "Tạo phiếu"}
+            Tạo phiếu
           </button>
         </div>
       </form>

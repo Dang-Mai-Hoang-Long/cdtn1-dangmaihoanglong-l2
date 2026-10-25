@@ -1,5 +1,5 @@
 import LoiUngDung from "../errors/AppError.js";
-import { conHanBaoHanh, duocTiepNhanBaoHanh } from "./warrantyRules.js";
+import { conHanBaoHanh } from "./warrantyRules.js";
 
 export default class DichVuPhieu {
   constructor(khoPhieu) {
@@ -38,12 +38,10 @@ export default class DichVuPhieu {
         category_id: "Nhóm sự cố không hợp lệ",
       });
     const conHan = conHanBaoHanh(thietBi);
-    const choPhepHetHan =
-      process.env.ALLOW_EXPIRED_WARRANTY_TICKETS !== "false";
-    if (!duocTiepNhanBaoHanh(thietBi, choPhepHetHan)) {
+    if (!conHan) {
       throw new LoiUngDung(
         "WARRANTY_NOT_APPROVED",
-        "Thiết bị hết hạn hoặc chưa xác minh bảo hành; cần quản lý phê duyệt.",
+        "Thiết bị hết hạn hoặc chưa xác minh bảo hành nên chưa thể tiếp nhận.",
       );
     }
     const mucUuTien = duLieu.priority || danhMuc.default_priority;
@@ -101,7 +99,7 @@ export default class DichVuPhieu {
    * @returns {Promise<object>} Phiếu đã được lưu.
    * @throws {LoiUngDung} Khi dữ liệu nghiệp vụ không hợp lệ hoặc thiết bị đã có phiếu chưa đóng.
    */
-  async taoPhieu(duLieu) {
+  async xacNhanTaoPhieu(duLieu) {
     const duLieuDaChuanBi = await this.chuanBiDuLieuTaoPhieu(duLieu);
     try {
       return await this.khoPhieu.taoPhieu(duLieuDaChuanBi);
