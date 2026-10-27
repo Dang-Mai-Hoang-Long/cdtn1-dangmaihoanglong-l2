@@ -45,8 +45,6 @@ Mô tả: Nhân viên tiếp nhận tra cứu khách hàng và thiết bị, ghi
 ├── seeds/                             # Dữ liệu mẫu
 ├── scripts/                           # Chạy migration và seed
 ├── tests/                             # Kiểm thử nghiệp vụ bằng Node.js Test Runner
-├── db/
-│   └── schema.sql                     # DDL tổng hợp để tham khảo
 ├── docs/                              # SRS, hợp đồng API, sơ đồ và thay đổi thiết kế
 ├── package.json                       # Scripts và khai báo thư viện của dự án
 └── vite.config.js                     # Cấu hình Vite và proxy API khi phát triển
