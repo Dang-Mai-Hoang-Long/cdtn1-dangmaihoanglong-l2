@@ -64,7 +64,7 @@ Chạy toàn bộ kiểm thử bằng một lệnh:
 npm test
 ```
 
-Bộ kiểm thử hiện có 10 ca `TC-01` đến `TC-10`, dùng dữ liệu/đối tượng giả nên không cần kết nối PostgreSQL. Kết quả thành công hiển thị số ca `pass` và `fail` trong terminal.
+Bộ kiểm thử hiện có 10 ca `TC-01` đến `TC-09`, dùng dữ liệu/đối tượng giả nên không cần kết nối PostgreSQL. Kết quả thành công hiển thị số ca `pass` và `fail` trong terminal.
 
 ## 6. Trạng thái hiện tại
 

@@ -8,6 +8,7 @@ const tenTrangThai = {
   CHO_LINH_KIEN: "Chờ linh kiện",
   HOAN_TAT: "Hoàn tất",
   DA_DONG: "Đã đóng",
+  DA_HUY: "Đã hủy",
 };
 
 export default function DanhSachPhieu({ khiTaoPhieu }) {
@@ -196,7 +197,7 @@ export default function DanhSachPhieu({ khiTaoPhieu }) {
                       <td>{phieu.ticket_code}</td>
                       <td>{phieu.customer_name}</td>
                       <td>{phieu.serial_no}</td>
-                      <td>{phieu.status}</td>
+                      <td>{tenTrangThai[phieu.status] || phieu.status}</td>
                       <td>{phieu.priority}</td>
                       <td>{phieu.category_name || "—"}</td>
                       <td>

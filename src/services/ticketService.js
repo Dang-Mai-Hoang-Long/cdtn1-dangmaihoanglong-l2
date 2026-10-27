@@ -41,7 +41,7 @@ export default class DichVuPhieu {
     if (!conHan) {
       throw new LoiUngDung(
         "WARRANTY_NOT_APPROVED",
-        "Thiết bị hết hạn hoặc chưa xác minh bảo hành nên chưa thể tiếp nhận.",
+        "Thiết bị hết hạn hoặc chưa xác minh bảo hành cần được quản lý xác nhận.",
       );
     }
     const mucUuTien = duLieu.priority || danhMuc.default_priority;

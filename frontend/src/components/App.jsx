@@ -18,6 +18,8 @@ const duLieuPhieuRong = {
   customer_id: null,
   serial_no: "",
   device_id: null,
+  purchase_date: null,
+  warranty_approved: null,
   issue_desc: "",
   category_id: "",
   priority: "",
@@ -48,6 +50,9 @@ function docBanNhap() {
           : null,
       // ID thiết bị cũ không được tin cậy sau refresh; serial sẽ được tra cứu lại.
       device_id: null,
+      // Trạng thái bảo hành cũ cũng cần được tra cứu lại từ backend.
+      purchase_date: null,
+      warranty_approved: null,
     };
   } catch {
     return duLieuPhieuRong;
@@ -143,9 +148,17 @@ export default function UngDung() {
             phone_masked: "",
             full_name: "",
             device_id: null,
+            purchase_date: null,
+            warranty_approved: null,
           }
         : {}),
-      ...(tenTruong === "serial_no" ? { device_id: null } : {}),
+      ...(tenTruong === "serial_no"
+        ? {
+            device_id: null,
+            purchase_date: null,
+            warranty_approved: null,
+          }
+        : {}),
       ...(tenTruong === "category_id" ? { priority: mucUuTienMacDinh } : {}),
     }));
     datLoiTruong((loiCu) => ({ ...loiCu, [tenTruong]: undefined }));
@@ -165,6 +178,8 @@ export default function UngDung() {
         phone: duLieuCu.phone,
         phone_masked: khachHang.phone_masked,
         device_id: null,
+        purchase_date: null,
+        warranty_approved: null,
       }));
     } catch (loi) {
       if (loi.loiTheoTruong?.phone)
@@ -199,8 +214,16 @@ export default function UngDung() {
             ...duLieuCu,
             device_id: thietBi.device_id,
             serial_no: thietBi.serial_no,
+            purchase_date: thietBi.purchase_date,
+            warranty_approved: thietBi.warranty_approved,
           }));
-          datThongBao("");
+          datThongBao(
+            thietBi.warranty_approved
+              ? ""
+              : thietBi.purchase_date
+                ? "Thiết bị đã hết hạn bảo hành."
+                : "Thiết bị chưa xác minh bảo hành do thiếu ngày mua.",
+          );
         }
       } catch (loi) {
         if (!conHieuLuc || loi.name === "AbortError") return;
@@ -273,7 +296,9 @@ export default function UngDung() {
     datLoiTruong({});
     datDangXuLy(true);
     try {
-      const ketQuaXemTruoc = await phieuApi.xemTruocTaoPhieu(lapDuLieuGui(duLieuPhieu));
+      const ketQuaXemTruoc = await phieuApi.xemTruocTaoPhieu(
+        lapDuLieuGui(duLieuPhieu),
+      );
       datPhieuXemTruoc({
         ...duLieuPhieu,
         ...ketQuaXemTruoc,
