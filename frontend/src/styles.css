@@ -673,7 +673,8 @@ textarea {
 }
 
 .nhomThongTinKhachHang {
-  grid-template-rows: 30px 30px 30px 70px 30px 30px;
+  grid-template-columns: 175px minmax(0, 1fr);
+  grid-template-rows: 30px 30px minmax(30px, auto) 70px 30px 30px;
   margin-top: 8px;
 }
 
@@ -685,6 +686,11 @@ textarea {
 
 .nhomThongTinKhachHang dd:nth-of-type(4) {
   white-space: pre-wrap;
+}
+
+.nhomThongTinKhachHang dd:nth-of-type(3) {
+  width: max-content;
+  max-width: 100%;
 }
 
 .nhomThongTinHan {
@@ -776,6 +782,9 @@ textarea {
   }
   .nhomThongTin {
     grid-template-columns: 175px minmax(0, 160px);
+  }
+  .nhomThongTinKhachHang {
+    grid-template-columns: 175px minmax(0, 1fr);
   }
   .dauTrangDanhSach {
     grid-template-columns: 110px minmax(0, 1fr);
