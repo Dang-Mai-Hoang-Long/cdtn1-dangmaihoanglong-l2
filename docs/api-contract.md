@@ -9,7 +9,7 @@
 | GET | `/api/tickets/categories` | Lấy danh mục sự cố và mức ưu tiên mặc định |
 | POST | `/api/tickets/preview` | Kiểm tra nghiệp vụ, tính hạn cam kết; không lưu phiếu |
 | POST | `/api/tickets` | Lưu phiếu cùng thời điểm và hạn đã xem trước |
-| GET | `/api/tickets?status={status}&page={page}&size={size}` | Xem danh sách phiếu, lọc trạng thái và phân trang |
+| GET | `/api/tickets?status={status}&page={page}&size={size}&sort={sort}` | Xem danh sách phiếu, lọc trạng thái, phân trang và sắp xếp theo mã phiếu |
 
 ## Quy ước chung
 
@@ -17,7 +17,7 @@
 - Tên trường request/response dùng `snake_case`.
 - Thời gian dùng chuỗi ISO 8601 có múi giờ, ví dụ `2026-09-08T14:30:00.000Z`.
 - Lỗi API dùng cấu trúc `{ "error": { "code": "...", "message": "...", "fields": {} } }`.
-- `GET /api/tickets` mặc định `page=1`, `size=20`; `size` tối đa 100. Response có `data`, `page`, `size`, `total`.
+- `GET /api/tickets` mặc định `page=1`, `size=20`; `size` tối đa 100. `sort` tùy chọn nhận `ticket_code_asc` hoặc `ticket_code_desc`; nếu bỏ qua, kết quả sắp theo thời điểm nhận mới nhất. Response có `data`, `page`, `size`, `total`.
 
 **Lỗi dùng chung**
 
@@ -154,9 +154,9 @@ Việc thêm phiếu và log trạng thái ban đầu nằm trong cùng transact
 
 Ngoài các lỗi `VALIDATION_FAILED`, `CUSTOMER_NOT_FOUND`, `DEVICE_NOT_FOUND`, `TICKET_CONFLICT`, `DEVICE_CUSTOMER_MISMATCH` và `WARRANTY_NOT_APPROVED` như endpoint preview, lỗi dữ liệu đầu vào còn có thể chỉ ra từng trường như `received_at` hoặc `due_date`. Request hợp lệ nhưng lỗi hệ thống không dự kiến trả `500 INTERNAL_SERVER_ERROR` theo cấu trúc lỗi chung.
 
-### GET /api/tickets?status={status}&page={page}&size={size}
+### GET /api/tickets?status={status}&page={page}&size={size}&sort={sort}
 
-Các query đều tùy chọn. `status` nếu có phải là một trong `MOI`, `DA_PHAN_CONG`, `DANG_XU_LY`, `CHO_LINH_KIEN`, `HOAN_TAT`, `DA_DONG`. Kết quả được sắp xếp theo thời điểm nhận mới nhất.
+Các query đều tùy chọn. `status` nếu có phải là một trong `MOI`, `DA_PHAN_CONG`, `DANG_XU_LY`, `CHO_LINH_KIEN`, `HOAN_TAT`, `DA_DONG`. `sort` nếu có nhận `ticket_code_asc` (mã phiếu tăng dần) hoặc `ticket_code_desc` (mã phiếu giảm dần). Nếu không truyền `sort`, kết quả được sắp xếp theo thời điểm nhận mới nhất.
 
 **Response 200 OK**
 
@@ -189,6 +189,7 @@ Các query đều tùy chọn. `status` nếu có phải là một trong `MOI`, 
 |:--:|---|---|
 | 400 | `INVALID_STATUS` | Trạng thái không thuộc danh sách hỗ trợ; lỗi ở `fields.status` |
 | 400 | `INVALID_PAGE_SIZE` | `page` không phải số nguyên dương hoặc `size` ngoài 1–100; trường sai nằm trong `fields` |
+| 400 | `INVALID_SORT_ORDER` | `sort` không thuộc các giá trị được hỗ trợ; lỗi nằm trong `fields.sort` |
 
 ## Tóm tắt validation theo endpoint
 
@@ -198,4 +199,4 @@ Các query đều tùy chọn. `status` nếu có phải là một trong `MOI`, 
 | `GET /api/devices` | `serial` không trống; `customer_id` là số nguyên dương; thiết bị thuộc khách hàng | Validator và `deviceService` |
 | `POST /api/tickets/preview` | ID là số nguyên hợp lệ; `center_id` không âm; mô tả lỗi không trống; ưu tiên hợp lệ nếu được gửi | Validator; điều kiện tồn tại/sở hữu/bảo hành ở service |
 | `POST /api/tickets` | Các trường preview và `received_at`, `due_date` hợp lệ; hạn phải sau thời điểm nhận | Validator; điều kiện nghiệp vụ ở service |
-| `GET /api/tickets` | Trạng thái hợp lệ; `page` dương; `size` từ 1 đến 100 | Validator |
+| `GET /api/tickets` | Trạng thái hợp lệ; `page` dương; `size` từ 1 đến 100; `sort` thuộc danh sách giá trị hỗ trợ | Validator |

@@ -3,7 +3,7 @@ export default class KhoPhieu {
     this.boKetNoi = boKetNoi;
   }
 
-  async layDanhSach({ trangThai, trang = 1, kichThuoc = 20 } = {}) {
+  async layDanhSach({ trangThai, trang = 1, kichThuoc = 20, thuTuMaPhieu } = {}) {
     const cacThamSoLoc = [];
     let dieuKienTrangThai = "";
     if (trangThai) {
@@ -21,6 +21,10 @@ export default class KhoPhieu {
 
     const viTriKichThuoc = cacThamSoLoc.length + 1;
     const viTriBatDau = cacThamSoLoc.length + 2;
+    const thuTuSql = {
+      ticket_code_asc: "t.ticket_code ASC, t.ticket_id ASC",
+      ticket_code_desc: "t.ticket_code DESC, t.ticket_id DESC",
+    }[thuTuMaPhieu] || "t.received_at DESC, t.ticket_id DESC";
     const cacThamSoDanhSach = [
       ...cacThamSoLoc,
       kichThuoc,
@@ -46,7 +50,7 @@ export default class KhoPhieu {
       JOIN device d ON d.device_id = t.device_id
       LEFT JOIN issue_category ic ON ic.category_id = t.category_id
       ${dieuKienTrangThai}
-      ORDER BY t.received_at DESC, t.ticket_id DESC
+      ORDER BY ${thuTuSql}
       LIMIT $${viTriKichThuoc} OFFSET $${viTriBatDau}
     `,
       cacThamSoDanhSach,

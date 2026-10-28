@@ -94,34 +94,62 @@ WITH RECURSIVE so_phieu_co_dinh AS (
     FROM tinh_han
     WHERE gio_con_lai = 0
     GROUP BY nhom_du_lieu, so_thu_tu
+), du_lieu_phieu AS (
+    SELECT
+        co_thoi_gian.*,
+        han_cam_ket.due_date,
+        device.customer_id,
+        device.device_id,
+        category.category_id
+    FROM co_thoi_gian
+    JOIN han_cam_ket USING (nhom_du_lieu, so_thu_tu)
+    JOIN device ON device.serial_no = co_thoi_gian.serial_no
+    JOIN issue_category category ON category.category_name = co_thoi_gian.category_name
+), phieu_co_id AS (
+    SELECT
+        ROW_NUMBER() OVER (
+            ORDER BY
+                CASE nhom_du_lieu WHEN 'CO_DINH' THEN 1 ELSE 2 END,
+                so_thu_tu
+        )::BIGINT AS ticket_id,
+        du_lieu_phieu.*
+    FROM du_lieu_phieu
+), phieu_co_ma AS (
+    SELECT
+        'BH-' || LPAD(ticket_id::TEXT, 6, '0') || '/'
+            || EXTRACT(YEAR FROM received_at)::INTEGER::TEXT AS ticket_code,
+        phieu_co_id.*
+    FROM phieu_co_id
 )
 INSERT INTO ticket (
-    ticket_code, customer_id, device_id, center_id, issue_desc,
+    ticket_id, ticket_code, customer_id, device_id, center_id, issue_desc,
     category_id, priority, status, received_at, due_date, closed_at, is_warranty
 )
 SELECT
-    CASE co_thoi_gian.nhom_du_lieu
-        WHEN 'CO_DINH'
-            THEN 'BH-' || LPAD((980000 + co_thoi_gian.so_thu_tu)::TEXT, 6, '0') || '/2026'
-        ELSE 'BH-' || LPAD((990000 + co_thoi_gian.so_thu_tu)::TEXT, 6, '0') || '/2026'
-    END,
-    device.customer_id,
-    device.device_id,
+    ticket_id,
+    ticket_code,
+    customer_id,
+    device_id,
     0,
-    co_thoi_gian.issue_desc,
-    category.category_id,
-    co_thoi_gian.priority,
-    co_thoi_gian.status,
-    co_thoi_gian.received_at,
-    han_cam_ket.due_date,
+    issue_desc,
+    category_id,
+    priority,
+    status,
+    received_at,
+    due_date,
     CASE
-        WHEN co_thoi_gian.status IN ('HOAN_TAT', 'DA_DONG') THEN han_cam_ket.due_date
+        WHEN status IN ('HOAN_TAT', 'DA_DONG') THEN due_date
         ELSE NULL
     END,
     TRUE
-FROM co_thoi_gian
-JOIN han_cam_ket USING (nhom_du_lieu, so_thu_tu)
-JOIN device ON device.serial_no = co_thoi_gian.serial_no
-JOIN issue_category category ON category.category_name = co_thoi_gian.category_name
-ORDER BY co_thoi_gian.nhom_du_lieu, co_thoi_gian.so_thu_tu
-ON CONFLICT (ticket_code) DO NOTHING;
+FROM phieu_co_ma
+ORDER BY ticket_id
+ON CONFLICT (ticket_id) DO NOTHING;
+
+-- Dong bo sequence de phieu tiep theo do ung dung tao tiep tuc tu ID lon nhat.
+SELECT setval(
+    pg_get_serial_sequence('ticket', 'ticket_id'),
+    COALESCE(MAX(ticket_id), 1),
+    MAX(ticket_id) IS NOT NULL
+)
+FROM ticket;

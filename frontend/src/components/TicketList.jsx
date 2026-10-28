@@ -20,6 +20,7 @@ export default function DanhSachPhieu({ khiTaoPhieu }) {
   const [trang, datTrang] = useState(1);
   const [kichThuoc, datKichThuoc] = useState(20);
   const [tongSo, datTongSo] = useState(0);
+  const [thuTuMaPhieu, datThuTuMaPhieu] = useState("");
 
   const tongSoTrang = Math.max(1, Math.ceil(tongSo / kichThuoc));
   const trangVuotQuaCuoi = trang > tongSoTrang;
@@ -36,6 +37,7 @@ export default function DanhSachPhieu({ khiTaoPhieu }) {
           trangThai: trangThaiLoc || undefined,
           trang,
           kichThuoc,
+          thuTuMaPhieu: thuTuMaPhieu || undefined,
           signal: boDieuKhien.signal,
         });
         datCacPhieu(Array.isArray(ketQua?.data) ? ketQua.data : []);
@@ -52,7 +54,7 @@ export default function DanhSachPhieu({ khiTaoPhieu }) {
 
     taiDanhSachPhieu();
     return () => boDieuKhien.abort();
-  }, [trangThaiLoc, trang, kichThuoc, soLanTaiLai]);
+  }, [trangThaiLoc, trang, kichThuoc, thuTuMaPhieu, soLanTaiLai]);
 
   return (
     <section className="manHinh manHinhDanhSach">
@@ -91,12 +93,37 @@ export default function DanhSachPhieu({ khiTaoPhieu }) {
               <option value="100">100</option>
             </select>
           </div>
-          <div className="bangCuon">
+          <div className={`bangCuon${kichThuoc > 20 ? " coCuonDoc" : ""}`}>
             <table>
               <thead>
                 <tr>
                   <th>STT</th>
-                  <th>Mã phiếu</th>
+                  <th
+                    aria-sort={
+                      thuTuMaPhieu === "ticket_code_asc"
+                        ? "ascending"
+                        : thuTuMaPhieu === "ticket_code_desc"
+                          ? "descending"
+                          : "none"
+                    }
+                  >
+                    <div className="sapXepMaPhieu">
+                      <label htmlFor="sap-xep-ma-phieu">Mã phiếu</label>
+                      <select
+                        id="sap-xep-ma-phieu"
+                        value={thuTuMaPhieu}
+                        aria-label="Sắp xếp danh sách theo mã phiếu"
+                        onChange={(suKien) => {
+                          datThuTuMaPhieu(suKien.target.value);
+                          datTrang(1);
+                        }}
+                      >
+                        <option value="">Mặc định</option>
+                        <option value="ticket_code_asc">Tăng dần ↑</option>
+                        <option value="ticket_code_desc">Giảm dần ↓</option>
+                      </select>
+                    </div>
+                  </th>
                   <th>Khách hàng</th>
                   <th>Mã thiết bị</th>
                   <th>

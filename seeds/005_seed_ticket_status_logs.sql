@@ -14,13 +14,7 @@ WITH phieu_mau AS (
             ELSE 5
         END AS cap_trang_thai
     FROM ticket
-    WHERE (
-            split_part(split_part(ticket_code, '/', 1), '-', 2)::INTEGER
-                BETWEEN 980011 AND 980030
-         OR split_part(split_part(ticket_code, '/', 1), '-', 2)::INTEGER
-                BETWEEN 990001 AND 991000
-      )
-      AND split_part(ticket_code, '/', 2) = '2026'
+    WHERE ticket_id BETWEEN 1 AND 1020
 ), moc_trang_thai AS (
     SELECT *
     FROM (VALUES

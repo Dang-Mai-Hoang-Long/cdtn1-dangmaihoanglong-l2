@@ -1,4 +1,4 @@
-﻿* {
+* {
   box-sizing: border-box;
 }
 
@@ -236,10 +236,16 @@ textarea {
   overflow-x: auto;
 }
 
+.bangCuon.coCuonDoc {
+  max-height: min(70vh, 650px);
+  overflow-y: auto;
+}
+
 .bangCuon table {
   width: 100%;
   min-width: 1095px;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   table-layout: fixed;
   text-align: center;
 }
@@ -248,15 +254,47 @@ textarea {
 .bangCuon td {
   height: 30px;
   padding: 4px 5px;
-  border: 1px solid #b3b3b3;
+  border-right: 1px solid #b3b3b3;
+  border-bottom: 1px solid #b3b3b3;
   font-size: 13px;
   font-weight: 400;
   overflow-wrap: anywhere;
 }
 
+.bangCuon th:first-child,
+.bangCuon td:first-child {
+  border-left: 1px solid #b3b3b3;
+}
+
 .bangCuon th {
   border-color: #b3b3b3;
   background: transparent;
+}
+
+.bangCuon thead th {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: #fff;
+  background-clip: padding-box;
+  border-top: 1px solid #b3b3b3;
+  border-bottom: 1px solid #888;
+}
+
+.sapXepMaPhieu {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.sapXepMaPhieu select {
+  width: min(88px, 100%);
+  min-width: 0;
+  min-height: 22px;
+  padding: 1px 3px;
+  font-size: 11px;
 }
 
 .bangCuon th:nth-child(1),

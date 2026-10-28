@@ -39,8 +39,8 @@ function docSoNguyenDuong(
 /**
  * Kiểm tra và chuẩn hóa query cho GET /api/tickets.
  * @param {Record<string, unknown>} truyVan Query string từ Express.
- * @returns {{trangThai: string|undefined, trang: number, kichThuoc: number}} Bộ lọc và phân trang đã chuẩn hóa.
- * @throws {LoiUngDung} Khi trạng thái hoặc tham số phân trang không hợp lệ.
+ * @returns {{trangThai: string|undefined, trang: number, kichThuoc: number, thuTuMaPhieu: string|undefined}} Bộ lọc, phân trang và sắp xếp đã chuẩn hóa.
+ * @throws {LoiUngDung} Khi trạng thái, tham số phân trang hoặc thứ tự sắp xếp không hợp lệ.
  */
 export function kiemTraTruyVanDanhSachPhieu(truyVan = {}) {
   const trangThai = truyVan.status;
@@ -56,6 +56,19 @@ export function kiemTraTruyVanDanhSachPhieu(truyVan = {}) {
   }
 
   const loiTheoTruong = {};
+  const thuTuMaPhieu = truyVan.sort;
+  const cacThuTuMaPhieu = ["ticket_code_asc", "ticket_code_desc"];
+  if (
+    thuTuMaPhieu !== undefined &&
+    (typeof thuTuMaPhieu !== "string" || !cacThuTuMaPhieu.includes(thuTuMaPhieu))
+  ) {
+    throw new LoiUngDung(
+      "INVALID_SORT_ORDER",
+      "Thứ tự sắp xếp mã phiếu không hợp lệ",
+      { sort: "Giá trị sắp xếp không được hỗ trợ" },
+    );
+  }
+
   const trang = docSoNguyenDuong(truyVan.page, 1, "page", loiTheoTruong);
   const kichThuoc = docSoNguyenDuong(
     truyVan.size,
@@ -73,7 +86,7 @@ export function kiemTraTruyVanDanhSachPhieu(truyVan = {}) {
     );
   }
 
-  return { trangThai, trang, kichThuoc };
+  return { trangThai, trang, kichThuoc, thuTuMaPhieu };
 }
 
 /**
