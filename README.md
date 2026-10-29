@@ -22,9 +22,13 @@ Mô tả: Nhân viên tiếp nhận tra cứu khách hàng và thiết bị, ghi
 Sau khi clone dự án, mở terminal tại thư mục gốc của dự án. Kiểm tra Node.js và npm bằng `node --version` và `npm --version`; Node.js phải thuộc một trong các dải phiên bản nêu ở mục 2.
 
 1. Tạo `.env` từ mẫu trong PowerShell: `Copy-Item .env.example .env` (macOS/Linux: `cp .env.example .env`), rồi thay `DB_PASSWORD` bằng mật khẩu PostgreSQL của máy.
+
 2. Mở pgAdmin, kết nối tới máy chủ PostgreSQL, nhấp phải **Databases** → **Create** → **Database...**. Nhập `mekong_mobile_l2` vào **Database**, chọn tài khoản PostgreSQL của bạn ở **Owner**, rồi nhấn **Save**. Nếu đặt tên database hoặc tài khoản khác, cập nhật `DB_NAME` hoặc `DB_USER` tương ứng trong `.env`.
-3. Cài đúng các phiên bản thư viện đã khóa trong `package-lock.json`: `npm ci`.
+
+3. Tại thư mục gốc dự án mở Terminal, cài thư viện bằng lệnh `npm install` (hoặc `npm ci` để cài sạch theo `package-lock.json`). Chỉ chạy một trong hai lệnh.
+
 4. Tạo cấu trúc bảng và nạp dữ liệu mẫu: `npm run db:setup`.
+
 5. Khởi động API và giao diện: `npm run dev`. Mở giao diện tại http://localhost:5173; kiểm tra API tại http://localhost:3001/health.
 
 ## 4. Cấu trúc thư mục
