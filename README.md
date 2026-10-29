@@ -15,6 +15,7 @@ Mô tả: Nhân viên tiếp nhận tra cứu khách hàng và thiết bị, ghi
 - Biến kết nối PostgreSQL: `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` trong `.env`; có thể dùng `DATABASE_URL` thay thế nhóm biến này.
 - API mặc định chạy ở cổng `3001` (`API_PORT`, hoặc `PORT` nếu không khai báo `API_PORT`); Vite mặc định chạy ở cổng `5173` (`VITE_PORT`).
 - `.env.example` chứa giá trị mẫu. Hãy thay `DB_PASSWORD` bằng mật khẩu PostgreSQL trên máy trước khi chạy.
+- Có thể chạy bằng Docker Desktop và Docker Compose v2 thay cho việc cài Node.js/PostgreSQL trực tiếp.
 - Không đưa thông tin kết nối thật hoặc khóa bí mật vào Git.
 
 ## 3. Hướng dẫn chạy
@@ -30,6 +31,19 @@ Sau khi clone dự án, mở terminal tại thư mục gốc của dự án. Ki�
 4. Tạo cấu trúc bảng và nạp dữ liệu mẫu: `npm run db:setup`.
 
 5. Khởi động API và giao diện: `npm run dev`. Mở giao diện tại http://localhost:5173; kiểm tra API tại http://localhost:3001/health.
+
+### Chạy bằng Docker
+
+1. Cài và mở Docker Desktop, bảo đảm Docker Compose v2 hoạt động.
+2. Tại thư mục gốc dự án, chạy một lệnh:
+
+```bash
+docker compose up --build
+```
+
+Compose tự tạo PostgreSQL, chờ database sẵn sàng, chạy migrations và seeds, sau đó khởi động ứng dụng. Mở http://localhost:3001. Dữ liệu database được giữ trong volume `du-lieu-postgres` khi container dừng. Nếu muốn chạy nền, thêm `-d` vào lệnh; dừng các container bằng `docker compose down`.
+
+Compose mặc định dùng mật khẩu demo cục bộ `mekong_mobile_l2_dev`. Có thể tạo `.env` từ `.env.example` và thay `DB_PASSWORD` trước khi chạy Docker.
 
 ## 4. Cấu trúc thư mục
 
@@ -76,4 +90,4 @@ Bộ kiểm thử hiện có 9 ca `TC-01` đến `TC-09`, dùng dữ liệu/đ�
 
 - [x] Module L2 tiếp nhận và phân loại: tra cứu khách hàng/thiết bị, kiểm tra dữ liệu, xem trước và tạo phiếu, tính hạn cam kết, xem/lọc danh sách, xem/sửa chi tiết và đóng phiếu ở mọi trạng thái trừ Đã đóng.
 - [x] Dựng cơ sở dữ liệu bằng migrations, nạp dữ liệu mẫu bằng seeds và có bộ kiểm thử nghiệp vụ.
-- [ ] Đóng gói bằng docker
+- [x] Có Dockerfile và Docker Compose để chạy ứng dụng cùng PostgreSQL bằng một lệnh.

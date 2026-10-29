@@ -1,0 +1,37 @@
+services:
+  database:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: ${DB_NAME:-mekong_mobile_l2}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-mekong_mobile_l2_dev}
+    volumes:
+      - du-lieu-postgres:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+    restart: unless-stopped
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      API_PORT: 3001
+      DB_HOST: database
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-mekong_mobile_l2}
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-mekong_mobile_l2_dev}
+    ports:
+      - "3001:3001"
+    restart: unless-stopped
+
+volumes:
+  du-lieu-postgres:
