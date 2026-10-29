@@ -10,8 +10,8 @@ Mô tả: Nhân viên tiếp nhận tra cứu khách hàng và thiết bị, ghi
 
 ## 2. Yêu cầu môi trường
 
-- Node.js 20 trở lên
-- PostgreSQL 16
+- Node.js `20.19.0` trở lên trong nhánh 20, hoặc `22.12.0` trở lên trong nhánh 22 trở đi. Vite 8 không hỗ trợ Node 21 hoặc các bản Node 22 cũ hơn `22.12.0`. (Phiên bản chạy kiểm thử là Node `v24.22.0`)
+- PostgreSQL 16 trở lên (Phiên bản chạy kiểm thử là PostgreSQL 18)
 - Biến kết nối PostgreSQL: `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` trong `.env`; có thể dùng `DATABASE_URL` thay thế nhóm biến này.
 - API mặc định chạy ở cổng `3001` (`API_PORT`, hoặc `PORT` nếu không khai báo `API_PORT`); Vite mặc định chạy ở cổng `5173` (`VITE_PORT`).
 - `.env.example` chứa giá trị mẫu. Hãy thay `DB_PASSWORD` bằng mật khẩu PostgreSQL trên máy trước khi chạy.
@@ -19,9 +19,11 @@ Mô tả: Nhân viên tiếp nhận tra cứu khách hàng và thiết bị, ghi
 
 ## 3. Hướng dẫn chạy
 
+Sau khi clone dự án, mở terminal tại thư mục gốc của dự án. Kiểm tra Node.js và npm bằng `node --version` và `npm --version`; Node.js phải thuộc một trong các dải phiên bản nêu ở mục 2.
+
 1. Tạo `.env` từ mẫu trong PowerShell: `Copy-Item .env.example .env` (macOS/Linux: `cp .env.example .env`), rồi thay `DB_PASSWORD` bằng mật khẩu PostgreSQL của máy.
 2. Mở pgAdmin, kết nối tới máy chủ PostgreSQL, nhấp phải **Databases** → **Create** → **Database...**. Nhập `mekong_mobile_l2` vào **Database**, chọn tài khoản PostgreSQL của bạn ở **Owner**, rồi nhấn **Save**. Nếu đặt tên database hoặc tài khoản khác, cập nhật `DB_NAME` hoặc `DB_USER` tương ứng trong `.env`.
-3. Cài các gói cần thiết: `npm install`.
+3. Cài đúng các phiên bản thư viện đã khóa trong `package-lock.json`: `npm ci`.
 4. Tạo cấu trúc bảng và nạp dữ liệu mẫu: `npm run db:setup`.
 5. Khởi động API và giao diện: `npm run dev`. Mở giao diện tại http://localhost:5173; kiểm tra API tại http://localhost:3001/health.
 
