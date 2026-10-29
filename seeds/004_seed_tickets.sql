@@ -1,4 +1,5 @@
 -- Nhom co dinh: bo qua 10 thiet bi dau; 10 phieu chua dong va 10 phieu hoan tat/dong.
+-- Khong co phieu dang mang trang thai DA_PHAN_CONG de demo ket qua loc rong.
 -- Nhom tu sinh: 1.000 phieu MOI dung cung mot mau du lieu.
 WITH RECURSIVE so_phieu_co_dinh AS (
     SELECT so_thu_tu
@@ -20,7 +21,7 @@ WITH RECURSIVE so_phieu_co_dinh AS (
         END AS serial_no,
         CASE
             WHEN mau.so_thu_tu <= 13 THEN 'MOI'
-            WHEN mau.so_thu_tu <= 16 THEN 'DA_PHAN_CONG'
+            WHEN mau.so_thu_tu <= 16 THEN 'MOI'
             WHEN mau.so_thu_tu <= 18 THEN 'DANG_XU_LY'
             WHEN mau.so_thu_tu <= 20 THEN 'CHO_LINH_KIEN'
             WHEN mau.so_thu_tu <= 25 THEN 'HOAN_TAT'
