@@ -11,7 +11,7 @@ const tenTrangThai = {
   DA_HUY: "Đã hủy",
 };
 
-export default function DanhSachPhieu({ khiTaoPhieu }) {
+export default function DanhSachPhieu({ khiTaoPhieu, khiXemChiTiet, lanCapNhatNgoai = 0 }) {
   const [cacPhieu, datCacPhieu] = useState([]);
   const [dangTai, datDangTai] = useState(true);
   const [loiTai, datLoiTai] = useState(null);
@@ -54,7 +54,7 @@ export default function DanhSachPhieu({ khiTaoPhieu }) {
 
     taiDanhSachPhieu();
     return () => boDieuKhien.abort();
-  }, [trangThaiLoc, trang, kichThuoc, thuTuMaPhieu, soLanTaiLai]);
+  }, [trangThaiLoc, trang, kichThuoc, thuTuMaPhieu, soLanTaiLai, lanCapNhatNgoai]);
 
   return (
     <section className="manHinh manHinhDanhSach">
@@ -230,8 +230,8 @@ export default function DanhSachPhieu({ khiTaoPhieu }) {
                       <td>
                         <button
                           type="button"
-                          disabled
-                          title="Chức năng xem chi tiết chưa được triển khai"
+                          className="nut nutNho"
+                          onClick={() => khiXemChiTiet(phieu)}
                         >
                           Chi tiết
                         </button>

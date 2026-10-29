@@ -139,7 +139,7 @@ SELECT
     received_at,
     due_date,
     CASE
-        WHEN status IN ('HOAN_TAT', 'DA_DONG') THEN due_date
+        WHEN status = 'DA_DONG' THEN due_date
         ELSE NULL
     END,
     TRUE

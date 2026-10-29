@@ -13,6 +13,8 @@ export const phieuApi = {
     const truyVan = chuoiTruyVan ? `?${chuoiTruyVan}` : "";
     return guiYeuCau(`/api/tickets${truyVan}`, { signal });
   },
+  /** Lấy thông tin đầy đủ của một phiếu. */
+  layChiTiet: (maPhieu) => guiYeuCau(`/api/tickets/${maPhieu}`),
   /** Lấy danh mục sự cố đang hoạt động để hiển thị trong biểu mẫu. */
   layDanhMucSuCo: () => guiYeuCau("/api/tickets/categories"),
   /** Xác thực dữ liệu và lấy hạn cam kết xem trước; endpoint này không lưu phiếu. */
@@ -24,6 +26,18 @@ export const phieuApi = {
   /** Lưu phiếu cùng received_at và due_date đã nhận từ bước xem trước. */
   xacNhanTaoPhieu: (duLieu) =>
     guiYeuCau("/api/tickets", { method: "POST", body: JSON.stringify(duLieu) }),
+  /** Cập nhật nội dung tiếp nhận và mức ưu tiên của phiếu. */
+  capNhatPhieu: (maPhieu, duLieu) =>
+    guiYeuCau(`/api/tickets/${maPhieu}`, {
+      method: "PUT",
+      body: JSON.stringify(duLieu),
+    }),
+  /** Đóng phiếu đã hoàn tất. */
+  dongPhieu: (maPhieu) =>
+    guiYeuCau(`/api/tickets/${maPhieu}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status: "DA_DONG" }),
+    }),
   /** Tra cứu khách hàng theo số điện thoại đã nhập. */
   timKhachHang: (soDienThoai) =>
     guiYeuCau(`/api/customers?phone=${encodeURIComponent(soDienThoai)}`),

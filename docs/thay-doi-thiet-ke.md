@@ -66,3 +66,11 @@
   - `GET /api/tickets?status={status}&page={page}&size={size}`: mô tả lọc danh sách theo trạng thái, phân trang, cấu trúc response và giá trị mặc định/giới hạn phân trang.
   - Bổ sung, làm rõ cấu trúc lỗi và mã lỗi áp dụng cho các API trên.
 - File thay đổi: `docs/api-contract.md`.
+
+### TD-08 Bổ sung xem/sửa chi tiết và đóng phiếu
+
+- Sinh viên tự đánh giá : Nút Chi tiết chưa hoạt động; nhân viên chưa thể điều chỉnh thông tin tiếp nhận hoặc đóng phiếu đã hoàn tất trong giao diện.
+- Quyết định : MỞ RỘNG
+- Lý do : Bổ sung thao tác hoàn thiện dữ liệu tiếp nhận và kết thúc phiếu, tận dụng màn hình danh sách, biểu mẫu và bảng log hiện có.
+- Ảnh hưởng : Bổ sung `GET /api/tickets/{ticket_id}` để xem chi tiết; `PUT /api/tickets/{ticket_id}` để sửa `issue_desc`, `category_id`, `priority` và tính lại `due_date` theo `received_at` ban đầu; `PATCH /api/tickets/{ticket_id}/status` chỉ cho phép chuyển `HOAN_TAT` sang `DA_DONG`. Thao tác đóng cập nhật `closed_at` và ghi `ticket_status_log` cùng transaction. Phiếu đã đóng/hủy không cho sửa. Seed chỉ gán `closed_at` cho phiếu `DA_DONG`. Đây là phần mở rộng ngoài phạm vi L2 được mô tả trong SRS gốc; không thêm quản lý phân công hoặc các trạng thái trung gian.
+- File thay đổi: `src/routes/ticketRoute.js`, `src/validators/ticketValidator.js`, `src/services/ticketService.js`, `src/repositories/ticketRepository.js`, `src/errors/errorHandler.js`, `frontend/src/api/tickets.api.js`, `frontend/src/components/TicketList.jsx`, `frontend/src/components/TicketForm.jsx`, `frontend/src/components/TicketDetail.jsx`, `frontend/src/components/App.jsx`, `frontend/src/styles.css`, `seeds/004_seed_tickets.sql`, `docs/api-contract.md`.

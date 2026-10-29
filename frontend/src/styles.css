@@ -44,7 +44,8 @@ textarea {
 .manHinhDanhSach {
   position: relative;
   width: min(1520px, calc(100vw - 80px));
-  min-height: 900px;
+  min-height: 910px;
+  padding-bottom: 55px;
   margin: 38px 0 38px 40px;
   border: 1px solid #666;
   border-right-color: transparent;
@@ -207,8 +208,8 @@ textarea {
 }
 
 .boLocTrangThai select {
-  width: 90px;
-  min-width: 100px;
+  width: 88px;
+  min-width: 98px;
   padding: 3px 6px;
   font-size: 11px;
 }
@@ -237,7 +238,7 @@ textarea {
 }
 
 .bangCuon.coCuonDoc {
-  max-height: min(70vh, 650px);
+  height: 820px;
   overflow-y: auto;
 }
 
@@ -659,6 +660,36 @@ textarea {
   margin: 0;
 }
 
+.nhomThongTinChiTiet {
+  grid-template-columns: 150px minmax(0, 1fr);
+  grid-auto-rows: minmax(30px, auto);
+  row-gap: 8px;
+}
+
+.nhomThongTinChiTiet dd {
+  white-space: pre-wrap;
+}
+
+.thongBaoChiTiet {
+  margin: 12px 0 0;
+  color: #a32626;
+}
+
+.thongBaoChiTiet.thongBaoThanhCong {
+  color: #167a3f;
+}
+
+.tomTatPhieuSua {
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  background: #f8fafc;
+}
+
+.tomTatPhieuSua p {
+  margin: 4px 0;
+}
+
 .nhomThongTin dt,
 .nhomThongTin dd {
   display: flex;
@@ -705,7 +736,7 @@ textarea {
 @media (max-width: 900px) {
   .manHinhDanhSach {
     width: calc(100vw - 32px);
-    min-height: 900px;
+    min-height: 910px;
     margin: 24px auto;
   }
 
@@ -726,7 +757,7 @@ textarea {
   }
   .manHinhDanhSach {
     width: calc(100vw - 24px);
-    min-height: 900px;
+    min-height: 910px;
     margin: 20px auto;
   }
   .manHinhTaoPhieu,
@@ -835,4 +866,12 @@ textarea {
   .nhomNut .nut {
     flex: 0 1 92px;
   }
+}
+
+.nhomNut .nutDongPhieu {
+  width: 94px;
+  flex: 0 0 94px;
+  border-color: #b3261e;
+  background: #b3261e;
+  color: #fff;
 }

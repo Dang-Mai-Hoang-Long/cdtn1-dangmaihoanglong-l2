@@ -10,6 +10,9 @@
 | POST | `/api/tickets/preview` | Kiểm tra nghiệp vụ, tính hạn cam kết; không lưu phiếu |
 | POST | `/api/tickets` | Lưu phiếu cùng thời điểm và hạn đã xem trước |
 | GET | `/api/tickets?status={status}&page={page}&size={size}&sort={sort}` | Xem danh sách phiếu, lọc trạng thái, phân trang và sắp xếp theo mã phiếu |
+| GET | `/api/tickets/{ticket_id}` | Lấy thông tin chi tiết một phiếu |
+| PUT | `/api/tickets/{ticket_id}` | Sửa mô tả lỗi, nhóm sự cố và mức ưu tiên của phiếu chưa đóng |
+| PATCH | `/api/tickets/{ticket_id}/status` | Đóng phiếu đang ở trạng thái Hoàn tất và ghi log chuyển trạng thái |
 
 ## Quy ước chung
 
@@ -191,6 +194,56 @@ Các query đều tùy chọn. `status` nếu có phải là một trong `MOI`, 
 | 400 | `INVALID_PAGE_SIZE` | `page` không phải số nguyên dương hoặc `size` ngoài 1–100; trường sai nằm trong `fields` |
 | 400 | `INVALID_SORT_ORDER` | `sort` không thuộc các giá trị được hỗ trợ; lỗi nằm trong `fields.sort` |
 
+### GET /api/tickets/{ticket_id}
+
+Trả thông tin đầy đủ để xem chi tiết phiếu. Endpoint không trả số điện thoại khách hàng.
+
+**Response 200 OK** gồm `ticket_id`, `ticket_code`, `customer_id`, `customer_name`, `device_id`, `serial_no`, `center_id`, `issue_desc`, `category_id`, `category_name`, `priority`, `status`, `received_at`, `due_date` và `closed_at`.
+
+**Lỗi có thể trả về:** `400 VALIDATION_FAILED` nếu mã phiếu không phải số nguyên dương; `404 NOT_FOUND` nếu không tìm thấy phiếu.
+
+### PUT /api/tickets/{ticket_id}
+
+Cập nhật toàn bộ nhóm trường được phép sửa: `issue_desc`, `category_id`, `priority`. Không thay đổi khách hàng, thiết bị, mã phiếu, trung tâm và thời điểm tiếp nhận. Hạn cam kết được tính lại theo mức ưu tiên mới, dựa trên `received_at` ban đầu và QT-04. Phiếu đã đóng hoặc đã hủy không được sửa.
+
+**Request body**
+
+```json
+{
+  "issue_desc": "Máy sạc không vào, đã kiểm tra lại cáp",
+  "category_id": 1,
+  "priority": "CAO"
+}
+```
+
+Response `200 OK` trả thông tin chi tiết phiếu sau cập nhật.
+
+**Lỗi có thể trả về:** `400 VALIDATION_FAILED` nếu dữ liệu sai; `404 NOT_FOUND` nếu phiếu không tồn tại; `409 TICKET_NOT_EDITABLE` nếu phiếu đã đóng hoặc đã hủy.
+
+### PATCH /api/tickets/{ticket_id}/status
+
+Chỉ hỗ trợ chuyển trạng thái từ `HOAN_TAT` sang `DA_DONG`.
+
+**Request body**
+
+```json
+{ "status": "DA_DONG" }
+```
+
+Khi cập nhật thành công, hệ thống đặt `closed_at` và ghi `ticket_status_log` với `from_status = 'HOAN_TAT'`, `to_status = 'DA_DONG'`, cùng thời điểm thay đổi. Cập nhật phiếu và ghi log dùng chung transaction; `changed_by = 0` vì phiên bản hiện tại chưa có đăng nhập/nhân viên.
+
+**Response 200 OK**
+
+```json
+{
+  "ticket_id": 88231,
+  "status": "DA_DONG",
+  "closed_at": "2026-09-11T14:30:00.000Z"
+}
+```
+
+**Lỗi có thể trả về:** `400 VALIDATION_FAILED` nếu trạng thái đích khác `DA_DONG`; `404 NOT_FOUND` nếu phiếu không tồn tại; `409 INVALID_STATUS_TRANSITION` nếu phiếu chưa ở trạng thái `HOAN_TAT`.
+
 ## Tóm tắt validation theo endpoint
 
 | Endpoint | Trường/điều kiện chính | Nơi kiểm tra hiện tại |
@@ -200,3 +253,6 @@ Các query đều tùy chọn. `status` nếu có phải là một trong `MOI`, 
 | `POST /api/tickets/preview` | ID là số nguyên hợp lệ; `center_id` không âm; mô tả lỗi không trống; ưu tiên hợp lệ nếu được gửi | Validator; điều kiện tồn tại/sở hữu/bảo hành ở service |
 | `POST /api/tickets` | Các trường preview và `received_at`, `due_date` hợp lệ; hạn phải sau thời điểm nhận | Validator; điều kiện nghiệp vụ ở service |
 | `GET /api/tickets` | Trạng thái hợp lệ; `page` dương; `size` từ 1 đến 100; `sort` thuộc danh sách giá trị hỗ trợ | Validator |
+| `GET /api/tickets/{ticket_id}` | Mã phiếu là số nguyên dương | Validator |
+| `PUT /api/tickets/{ticket_id}` | Mô tả lỗi không rỗng; nhóm sự cố và mức ưu tiên hợp lệ | Validator; phiếu đã đóng/hủy và danh mục tồn tại ở service/repository |
+| `PATCH /api/tickets/{ticket_id}/status` | Chỉ nhận trạng thái đích `DA_DONG`; phiếu hiện tại phải `HOAN_TAT` | Validator và service; cập nhật kèm log trong repository |

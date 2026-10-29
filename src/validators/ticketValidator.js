@@ -167,3 +167,64 @@ export function kiemTraDuLieuTaoPhieu(
   }
   return ketQua;
 }
+
+/**
+ * Kiểm tra mã phiếu nhận từ URL.
+ * @param {unknown} giaTri Mã phiếu trong tham số đường dẫn.
+ * @returns {number} Mã phiếu đã chuyển thành số nguyên dương.
+ */
+export function kiemTraMaPhieu(giaTri) {
+  const maPhieu = Number(giaTri);
+  if (!Number.isSafeInteger(maPhieu) || maPhieu < 1) {
+    throw new LoiUngDung("VALIDATION_FAILED", "Mã phiếu không hợp lệ", {
+      ticket_id: "Phải là số nguyên dương",
+    });
+  }
+  return maPhieu;
+}
+
+/**
+ * Kiểm tra các trường được phép chỉnh sửa sau khi tạo phiếu.
+ * @param {Record<string, unknown>} duLieu Dữ liệu JSON từ client.
+ * @returns {{issue_desc: string, category_id: number, priority: string}} Dữ liệu đã chuẩn hóa.
+ */
+export function kiemTraDuLieuCapNhatPhieu(duLieu = {}) {
+  if (!duLieu || typeof duLieu !== "object" || Array.isArray(duLieu)) {
+    throw new LoiUngDung("VALIDATION_FAILED", "Dữ liệu không hợp lệ", {
+      body: "Phải là một đối tượng JSON",
+    });
+  }
+  const loiTheoTruong = {};
+  const issueDesc = typeof duLieu.issue_desc === "string" ? duLieu.issue_desc.trim() : "";
+  const categoryId = Number(duLieu.category_id);
+  const cacMucUuTien = ["CAO", "TRUNG_BINH", "THAP"];
+
+  if (!issueDesc) loiTheoTruong.issue_desc = "Mô tả lỗi không được để trống";
+  if (!Number.isSafeInteger(categoryId) || categoryId < 1) {
+    loiTheoTruong.category_id = "Phải là mã nhóm sự cố hợp lệ";
+  }
+  if (!cacMucUuTien.includes(duLieu.priority)) {
+    loiTheoTruong.priority = "Mức ưu tiên không hợp lệ";
+  }
+
+  if (Object.keys(loiTheoTruong).length) {
+    throw new LoiUngDung("VALIDATION_FAILED", "Dữ liệu không hợp lệ", loiTheoTruong);
+  }
+
+  return { issue_desc: issueDesc, category_id: categoryId, priority: duLieu.priority };
+}
+
+/** Chỉ cho phép yêu cầu đóng phiếu theo trạng thái đích DA_DONG. */
+export function kiemTraDuLieuDongPhieu(duLieu = {}) {
+  if (!duLieu || typeof duLieu !== "object" || Array.isArray(duLieu)) {
+    throw new LoiUngDung("VALIDATION_FAILED", "Dữ liệu không hợp lệ", {
+      body: "Phải là một đối tượng JSON",
+    });
+  }
+  if (duLieu.status !== "DA_DONG") {
+    throw new LoiUngDung("VALIDATION_FAILED", "Trạng thái đóng phiếu không hợp lệ", {
+      status: "Chỉ hỗ trợ chuyển phiếu sang trạng thái DA_DONG",
+    });
+  }
+  return { status: "DA_DONG" };
+}

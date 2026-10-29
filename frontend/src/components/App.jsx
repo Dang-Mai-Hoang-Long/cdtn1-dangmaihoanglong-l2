@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import XacNhanPhieu from "./TicketConfirmation.jsx";
+import ChiTietPhieu from "./TicketDetail.jsx";
 import BieuMauPhieu from "./TicketForm.jsx";
 import DanhSachPhieu from "./TicketList.jsx";
 import { phieuApi } from "../api/tickets.api.js";
@@ -8,6 +9,7 @@ const cacManHinh = {
   danhSach: "danh-sach",
   taoPhieu: "tao-phieu",
   xacNhan: "xac-nhan",
+  chiTietPhieu: "chi-tiet-phieu",
 };
 
 const khoaBanNhap = "banNhapTaoPhieuBaoHanh.v1";
@@ -69,6 +71,7 @@ function xoaBanNhap() {
 
 function layManHinhTuHash() {
   const hashHienTai = window.location.hash.slice(1);
+  if (hashHienTai.startsWith(`${cacManHinh.chiTietPhieu}/`)) return "chiTietPhieu";
   return (
     Object.keys(cacManHinh).find(
       (manHinh) => cacManHinh[manHinh] === hashHienTai,
@@ -81,12 +84,19 @@ export default function UngDung() {
   const [duLieuPhieu, datDuLieuPhieu] = useState(docBanNhap);
   const [loiTruong, datLoiTruong] = useState({});
   const [thongBao, datThongBao] = useState("");
+  const [thongBaoThanhCong, datThongBaoThanhCong] = useState(false);
   const [danhMuc, datDanhMuc] = useState([]);
   const [dangXuLy, datDangXuLy] = useState(false);
   const [dangTraCuuThietBi, datDangTraCuuThietBi] = useState(false);
   const [phieuXemTruoc, datPhieuXemTruoc] = useState(null);
+  const [phieuDangXem, datPhieuDangXem] = useState(null);
+  const [dangTaiChiTiet, datDangTaiChiTiet] = useState(false);
+  const [loiTaiChiTiet, datLoiTaiChiTiet] = useState(false);
+  const [dangSuaPhieu, datDangSuaPhieu] = useState(false);
+  const [lanCapNhatDanhSach, datLanCapNhatDanhSach] = useState(0);
 
   useEffect(() => {
+    if (manHinhHienTai !== "taoPhieu") return;
     const coDuLieu = Boolean(
       duLieuPhieu.phone ||
       duLieuPhieu.full_name ||
@@ -108,7 +118,7 @@ export default function UngDung() {
     } catch {
       /* Form vẫn hoạt động nếu Storage hết dung lượng hoặc bị trình duyệt chặn. */
     }
-  }, [duLieuPhieu]);
+  }, [duLieuPhieu, manHinhHienTai]);
 
   useEffect(() => {
     phieuApi
@@ -125,8 +135,27 @@ export default function UngDung() {
     return () => window.removeEventListener("hashchange", dongBoManHinh);
   }, []);
 
-  function chuyenManHinh(manHinhTiepTheo) {
-    const hashTiepTheo = `#${cacManHinh[manHinhTiepTheo]}`;
+  useEffect(() => {
+    const ketQuaHash = window.location.hash.match(/^#chi-tiet-phieu\/(\d+)$/);
+    if (!ketQuaHash) return;
+
+    datDangTaiChiTiet(true);
+    phieuApi
+      .layChiTiet(ketQuaHash[1])
+      .then(datPhieuDangXem)
+      .catch((loi) => {
+        datLoiTaiChiTiet(true);
+        datThongBao(loi.message || "Không thể tải chi tiết phiếu.");
+      })
+      .finally(() => datDangTaiChiTiet(false));
+  }, []);
+
+  function chuyenManHinh(manHinhTiepTheo, maPhieu) {
+    const duoiHash =
+      manHinhTiepTheo === "chiTietPhieu"
+        ? `/${maPhieu || phieuDangXem?.ticket_id || ""}`
+        : "";
+    const hashTiepTheo = `#${cacManHinh[manHinhTiepTheo]}${duoiHash}`;
     if (window.location.hash === hashTiepTheo)
       datManHinhHienTai(manHinhTiepTheo);
     else window.location.hash = hashTiepTheo;
@@ -356,11 +385,123 @@ export default function UngDung() {
     chuyenManHinh("danhSach");
   }
 
+  function batDauTaoPhieu() {
+    datDangSuaPhieu(false);
+    datDuLieuPhieu(duLieuPhieuRong);
+    datLoiTruong({});
+    datThongBao("");
+    chuyenManHinh("taoPhieu");
+  }
+
+  async function moChiTietPhieu(phieu) {
+    datDangSuaPhieu(false);
+    datPhieuDangXem(phieu);
+    datDangTaiChiTiet(true);
+    datLoiTaiChiTiet(false);
+    datThongBao("");
+    datThongBaoThanhCong(false);
+    chuyenManHinh("chiTietPhieu", phieu.ticket_id);
+    try {
+      datPhieuDangXem(await phieuApi.layChiTiet(phieu.ticket_id));
+    } catch (loi) {
+      datLoiTaiChiTiet(true);
+      datThongBao(loi.message || "Không thể tải chi tiết phiếu.");
+    } finally {
+      datDangTaiChiTiet(false);
+    }
+  }
+
+  function batDauChinhSuaPhieu() {
+    if (!phieuDangXem) return;
+    datDuLieuPhieu({
+      ...duLieuPhieuRong,
+      issue_desc: phieuDangXem.issue_desc || "",
+      category_id: String(phieuDangXem.category_id || ""),
+      priority: phieuDangXem.priority || "",
+    });
+    datLoiTruong({});
+    datThongBao("");
+    datThongBaoThanhCong(false);
+    datDangSuaPhieu(true);
+  }
+
+  async function luuThayDoiPhieu(suKien) {
+    suKien.preventDefault();
+    if (!phieuDangXem || dangXuLy) return;
+    const loiMoi = {};
+    if (!duLieuPhieu.issue_desc.trim())
+      loiMoi.issue_desc = "Mô tả lỗi không được để trống";
+    if (!duLieuPhieu.category_id)
+      loiMoi.category_id = "Vui lòng chọn nhóm sự cố";
+    if (!duLieuPhieu.priority)
+      loiMoi.priority = "Vui lòng chọn mức ưu tiên";
+    if (Object.keys(loiMoi).length) {
+      datLoiTruong(loiMoi);
+      return;
+    }
+
+    datLoiTruong({});
+    datThongBao("");
+    datDangXuLy(true);
+    try {
+      const phieuCapNhat = await phieuApi.capNhatPhieu(phieuDangXem.ticket_id, {
+        issue_desc: duLieuPhieu.issue_desc,
+        category_id: Number(duLieuPhieu.category_id),
+        priority: duLieuPhieu.priority,
+      });
+      datPhieuDangXem(phieuCapNhat);
+      datDuLieuPhieu(duLieuPhieuRong);
+      datThongBao("Đã cập nhật phiếu bảo hành.");
+      datThongBaoThanhCong(true);
+      datDangSuaPhieu(false);
+      datLanCapNhatDanhSach((soLan) => soLan + 1);
+    } catch (loi) {
+      datThongBaoThanhCong(false);
+      if (loi.loiTheoTruong) datLoiTruong(loi.loiTheoTruong);
+      else datThongBao(loi.message || "Không thể cập nhật phiếu lúc này.");
+    } finally {
+      datDangXuLy(false);
+    }
+  }
+
+  async function dongPhieuDangXem() {
+    if (!phieuDangXem || dangXuLy) return;
+    if (!window.confirm(`Đóng phiếu ${phieuDangXem.ticket_code}?`)) return;
+    datDangXuLy(true);
+    datThongBao("");
+    datThongBaoThanhCong(false);
+    try {
+      const ketQua = await phieuApi.dongPhieu(phieuDangXem.ticket_id);
+      datPhieuDangXem((phieuCu) => ({ ...phieuCu, ...ketQua }));
+      datThongBao("Đã đóng phiếu bảo hành.");
+      datThongBaoThanhCong(true);
+      datLanCapNhatDanhSach((soLan) => soLan + 1);
+    } catch (loi) {
+      datThongBaoThanhCong(false);
+      datThongBao(loi.message || "Không thể đóng phiếu lúc này.");
+    } finally {
+      datDangXuLy(false);
+    }
+  }
+
+  function huyChinhSuaPhieu() {
+    datDangSuaPhieu(false);
+    datDuLieuPhieu(duLieuPhieuRong);
+    datLoiTruong({});
+    datThongBao("");
+    datThongBaoThanhCong(false);
+    chuyenManHinh("chiTietPhieu");
+  }
+
   return (
     <main className="khungNoiDung">
-      {manHinhHienTai === "danhSach" && (
-        <DanhSachPhieu khiTaoPhieu={() => chuyenManHinh("taoPhieu")} />
-      )}
+      <div className={manHinhHienTai === "danhSach" ? "" : "an"}>
+        <DanhSachPhieu
+          khiTaoPhieu={batDauTaoPhieu}
+          khiXemChiTiet={moChiTietPhieu}
+          lanCapNhatNgoai={lanCapNhatDanhSach}
+        />
+      </div>
       {manHinhHienTai === "taoPhieu" && (
         <BieuMauPhieu
           duLieu={duLieuPhieu}
@@ -382,6 +523,49 @@ export default function UngDung() {
           dangXuLy={dangXuLy}
           khiQuayLai={() => chuyenManHinh("taoPhieu")}
           khiXacNhan={xacNhanTaoPhieu}
+        />
+      )}
+      {manHinhHienTai === "chiTietPhieu" && !phieuDangXem && (
+        <section className="manHinh manHinhXacNhan">
+          <header className="tieuDeManHinh"><h1>Chi tiết phiếu bảo hành</h1></header>
+          <div className="khungXacNhan">
+            <p role={dangTaiChiTiet ? "status" : "alert"}>
+              {dangTaiChiTiet ? "Đang tải chi tiết phiếu..." : thongBao || "Không có thông tin phiếu để hiển thị."}
+            </p>
+            <div className="nhomNut">
+              <button className="nut nutPhu" type="button" onClick={() => chuyenManHinh("danhSach")}>
+                Quay lại danh sách
+              </button>
+            </div>
+          </div>
+        </section>
+      )}
+      {manHinhHienTai === "chiTietPhieu" && phieuDangXem && !dangSuaPhieu && (
+        <ChiTietPhieu
+          phieu={phieuDangXem}
+          thongBao={dangTaiChiTiet ? "Đang tải chi tiết phiếu..." : thongBao}
+          thongBaoThanhCong={thongBaoThanhCong}
+          dangXuLy={dangXuLy || dangTaiChiTiet}
+          coLoiTaiChiTiet={loiTaiChiTiet}
+          khiQuayLai={() => chuyenManHinh("danhSach")}
+          khiChinhSua={batDauChinhSuaPhieu}
+          khiDongPhieu={dongPhieuDangXem}
+        />
+      )}
+      {manHinhHienTai === "chiTietPhieu" && phieuDangXem && dangSuaPhieu && (
+        <BieuMauPhieu
+          duLieu={duLieuPhieu}
+          loiTruong={loiTruong}
+          thongBao={thongBao}
+          danhMuc={danhMuc}
+          dangXuLy={dangXuLy}
+          dangTraCuuThietBi={false}
+          khiThayDoi={thayDoiTruong}
+          khiTraCuuKhachHang={() => {}}
+          khiHuy={huyChinhSuaPhieu}
+          khiXemTruoc={luuThayDoiPhieu}
+          cheDoChinhSua
+          phieuHienTai={phieuDangXem}
         />
       )}
     </main>

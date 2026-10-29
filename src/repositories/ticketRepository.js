@@ -64,6 +64,93 @@ export default class KhoPhieu {
     };
   }
 
+  async layChiTiet(maPhieu) {
+    const { rows } = await this.boKetNoi.query(
+      `
+      SELECT
+        t.ticket_id,
+        t.ticket_code,
+        t.customer_id,
+        c.full_name AS customer_name,
+        t.device_id,
+        d.serial_no,
+        t.center_id,
+        t.issue_desc,
+        t.category_id,
+        ic.category_name,
+        t.priority,
+        t.status,
+        t.received_at,
+        t.due_date,
+        t.closed_at
+      FROM ticket t
+      JOIN customer c ON c.customer_id = t.customer_id
+      JOIN device d ON d.device_id = t.device_id
+      LEFT JOIN issue_category ic ON ic.category_id = t.category_id
+      WHERE t.ticket_id = $1
+    `,
+      [maPhieu],
+    );
+    return rows[0] || null;
+  }
+
+  async capNhatThongTin(maPhieu, duLieu) {
+    const { rowCount } = await this.boKetNoi.query(
+      `
+      UPDATE ticket
+      SET issue_desc = $2, category_id = $3, priority = $4, due_date = $5
+      WHERE ticket_id = $1 AND status NOT IN ('DA_DONG', 'DA_HUY')
+    `,
+      [maPhieu, duLieu.issue_desc, duLieu.category_id, duLieu.priority, duLieu.due_date],
+    );
+    return rowCount > 0 ? this.layChiTiet(maPhieu) : null;
+  }
+
+  async dongPhieu(maPhieu) {
+    const ketNoi = await this.boKetNoi.connect();
+    try {
+      await ketNoi.query("BEGIN");
+      const { rows } = await ketNoi.query(
+        "SELECT status FROM ticket WHERE ticket_id = $1 FOR UPDATE",
+        [maPhieu],
+      );
+      if (!rows[0]) {
+        await ketNoi.query("ROLLBACK");
+        return null;
+      }
+      if (rows[0].status !== "HOAN_TAT") {
+        await ketNoi.query("ROLLBACK");
+        return { khongTheDong: true, trangThai: rows[0].status };
+      }
+
+      const { rows: phieuDaDong } = await ketNoi.query(
+        `
+        UPDATE ticket
+        SET status = 'DA_DONG', closed_at = CURRENT_TIMESTAMP
+        WHERE ticket_id = $1
+        RETURNING ticket_id, status, closed_at
+      `,
+        [maPhieu],
+      );
+      const phieu = phieuDaDong[0];
+      await ketNoi.query(
+        `
+        INSERT INTO ticket_status_log (
+          ticket_id, from_status, to_status, changed_at, changed_by, note
+        ) VALUES ($1, 'HOAN_TAT', 'DA_DONG', $2, 0, $3)
+      `,
+        [phieu.ticket_id, phieu.closed_at, "Đóng phiếu sau khi hoàn tất."],
+      );
+      await ketNoi.query("COMMIT");
+      return phieu;
+    } catch (loi) {
+      await ketNoi.query("ROLLBACK");
+      throw loi;
+    } finally {
+      ketNoi.release();
+    }
+  }
+
   async layDanhMucSuCo() {
     const { rows } = await this.boKetNoi.query(`
       SELECT category_id, category_name, default_priority

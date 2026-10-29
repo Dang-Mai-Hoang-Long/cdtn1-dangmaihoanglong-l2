@@ -9,6 +9,8 @@ export default function BieuMauPhieu({
   khiTraCuuKhachHang,
   khiHuy,
   khiXemTruoc,
+  cheDoChinhSua = false,
+  phieuHienTai,
 }) {
   function doiTruong(suKien) {
     khiThayDoi(suKien.target.name, suKien.target.value);
@@ -17,75 +19,86 @@ export default function BieuMauPhieu({
   return (
     <section className="manHinh manHinhTaoPhieu">
       <header className="tieuDeManHinh">
-        <h1>Tạo phiếu bảo hành</h1>
+        <h1>{cheDoChinhSua ? "Chỉnh sửa phiếu bảo hành" : "Tạo phiếu bảo hành"}</h1>
       </header>
       <form className="bieuMau" onSubmit={khiXemTruoc} noValidate>
-        <div className="truongHang truongTraCuu">
-          <label htmlFor="so-dien-thoai">Số điện thoại khách hàng</label>
-          <div>
-            <div className="hangTraCuu">
-              <input
-                id="so-dien-thoai"
-                name="phone"
-                type="tel"
-                autoComplete="tel"
-                placeholder="Nhập số điện thoại"
-                value={duLieu.phone}
-                onChange={doiTruong}
-                aria-invalid={Boolean(loiTruong.phone)}
-              />
-              <button
-                className="nut nutTraCuu"
-                type="button"
-                onClick={khiTraCuuKhachHang}
-                disabled={dangXuLy}
-              >
-                Tra cứu
-              </button>
-            </div>
-            <p className="loiTruong" title={loiTruong.phone || undefined}>
-              {loiTruong.phone || "\u00a0"}
-            </p>
+        {cheDoChinhSua && (
+          <div className="tomTatPhieuSua">
+            <p><strong>Mã phiếu:</strong> {phieuHienTai?.ticket_code}</p>
+            <p><strong>Khách hàng:</strong> {phieuHienTai?.customer_name}</p>
+            <p><strong>Mã thiết bị:</strong> {phieuHienTai?.serial_no}</p>
           </div>
-        </div>
-        <div className="truongHang">
-          <label htmlFor="ho-ten">Họ tên khách hàng</label>
-          <input
-            id="ho-ten"
-            name="full_name"
-            type="text"
-            placeholder="Họ tên khách hàng"
-            value={duLieu.full_name}
-            readOnly
-          />
-        </div>
-        <div className="truongHang truongSerial">
-          <label htmlFor="so-serial">Số serial thiết bị</label>
-          <div>
-            <div className="hangTraCuu hangTraCuuSerial">
+        )}
+        {!cheDoChinhSua && (
+          <div className="truongHang truongTraCuu">
+            <label htmlFor="so-dien-thoai">Số điện thoại khách hàng</label>
+            <div>
+              <div className="hangTraCuu">
+                <input
+                  id="so-dien-thoai"
+                  name="phone"
+                  type="tel"
+                  autoComplete="tel"
+                  placeholder="Nhập số điện thoại"
+                  value={duLieu.phone}
+                  onChange={doiTruong}
+                  aria-invalid={Boolean(loiTruong.phone)}
+                />
+                <button
+                  className="nut nutTraCuu"
+                  type="button"
+                  onClick={khiTraCuuKhachHang}
+                  disabled={dangXuLy}
+                >
+                  Tra cứu
+                </button>
+              </div>
+              <p className="loiTruong" title={loiTruong.phone || undefined}>
+                {loiTruong.phone || "\u00a0"}
+              </p>
+            </div>
+          </div>
+        )}
+        {!cheDoChinhSua && (
+          <>
+            <div className="truongHang">
+              <label htmlFor="ho-ten">Họ tên khách hàng</label>
               <input
-                id="so-serial"
-                name="serial_no"
+                id="ho-ten"
+                name="full_name"
                 type="text"
-                placeholder="Nhập số serial thiết bị"
-                value={duLieu.serial_no}
-                onChange={doiTruong}
-                aria-invalid={Boolean(loiTruong.serial_no)}
+                placeholder="Họ tên khách hàng"
+                value={duLieu.full_name}
+                readOnly
               />
             </div>
-            <p
-              className={`loiTruong${dangTraCuuThietBi ? " trangThaiTraCuu" : ""}`}
-              role={dangTraCuuThietBi ? "status" : undefined}
-              title={
-                dangTraCuuThietBi ? undefined : loiTruong.serial_no || undefined
-              }
-            >
-              {dangTraCuuThietBi
-                ? "Đang kiểm tra thiết bị…"
-                : loiTruong.serial_no || "\u00a0"}
-            </p>
-          </div>
-        </div>
+            <div className="truongHang truongSerial">
+              <label htmlFor="so-serial">Số serial thiết bị</label>
+              <div>
+                <div className="hangTraCuu hangTraCuuSerial">
+                  <input
+                    id="so-serial"
+                    name="serial_no"
+                    type="text"
+                    placeholder="Nhập số serial thiết bị"
+                    value={duLieu.serial_no}
+                    onChange={doiTruong}
+                    aria-invalid={Boolean(loiTruong.serial_no)}
+                  />
+                </div>
+                <p
+                  className={`loiTruong${dangTraCuuThietBi ? " trangThaiTraCuu" : ""}`}
+                  role={dangTraCuuThietBi ? "status" : undefined}
+                  title={dangTraCuuThietBi ? undefined : loiTruong.serial_no || undefined}
+                >
+                  {dangTraCuuThietBi
+                    ? "Đang kiểm tra thiết bị…"
+                    : loiTruong.serial_no || "\u00a0"}
+                </p>
+              </div>
+            </div>
+          </>
+        )}
         <div className="truongHang truongMoTa">
           <label htmlFor="mo-ta-loi">Mô tả lỗi</label>
           <div>
@@ -179,7 +192,7 @@ export default function BieuMauPhieu({
             type="submit"
             disabled={dangXuLy || dangTraCuuThietBi}
           >
-            Tạo phiếu
+            {cheDoChinhSua ? "Lưu" : "Tạo phiếu"}
           </button>
         </div>
       </form>
