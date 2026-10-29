@@ -74,3 +74,11 @@
 - Lý do : Bổ sung thao tác hoàn thiện dữ liệu tiếp nhận và kết thúc phiếu, tận dụng màn hình danh sách, biểu mẫu và bảng log hiện có.
 - Ảnh hưởng : Bổ sung `GET /api/tickets/{ticket_id}` để xem chi tiết; `PUT /api/tickets/{ticket_id}` để sửa `issue_desc`, `category_id`, `priority` và tính lại `due_date` theo `received_at` ban đầu; `PATCH /api/tickets/{ticket_id}/status` chỉ cho phép chuyển `HOAN_TAT` sang `DA_DONG`. Thao tác đóng cập nhật `closed_at` và ghi `ticket_status_log` cùng transaction. Phiếu đã đóng/hủy không cho sửa. Seed chỉ gán `closed_at` cho phiếu `DA_DONG`. Đây là phần mở rộng ngoài phạm vi L2 được mô tả trong SRS gốc; không thêm quản lý phân công hoặc các trạng thái trung gian.
 - File thay đổi: `src/routes/ticketRoute.js`, `src/validators/ticketValidator.js`, `src/services/ticketService.js`, `src/repositories/ticketRepository.js`, `src/errors/errorHandler.js`, `frontend/src/api/tickets.api.js`, `frontend/src/components/TicketList.jsx`, `frontend/src/components/TicketForm.jsx`, `frontend/src/components/TicketDetail.jsx`, `frontend/src/components/App.jsx`, `frontend/src/styles.css`, `seeds/004_seed_tickets.sql`, `docs/api-contract.md`.
+
+### TD-09 Cho phép đóng phiếu từ mọi trạng thái
+
+- Sinh viên tự đánh giá : Chức năng đóng phiếu trước đây chỉ áp dụng cho phiếu ở trạng thái `HOAN_TAT`, khiến nhân viên tiếp nhận không thể đóng phiếu từ các trạng thái khác.
+- Quyết định : SỬA
+- Lý do : Luồng hiện tại cần cho phép nhân viên đóng phiếu ở bất kỳ trạng thái nào; chỉ phiếu đã `DA_DONG` mới không thể đóng lại.
+- Ảnh hưởng : Nút Đóng phiếu hiển thị cho mọi trạng thái trừ `DA_DONG`. Repository cập nhật trạng thái và `closed_at`, đồng thời ghi log với `from_status` lấy từ trạng thái thực tế của phiếu và `to_status = 'DA_DONG'` trong cùng transaction. Hợp đồng API và README được cập nhật cho hành vi mới. SRS mô tả chuỗi trạng thái vòng đời nhưng không nêu điều kiện bắt buộc phải ở `HOAN_TAT` mới được đóng; điều kiện cũ nằm trong `docs/api-contract.md` và ghi nhận triển khai TD-08.
+- File thay đổi: `src/services/ticketService.js`, `src/repositories/ticketRepository.js`, `frontend/src/components/TicketDetail.jsx`, `frontend/src/api/tickets.api.js`, `docs/api-contract.md`, `docs/thay-doi-thiet-ke.md`, `README.md`.

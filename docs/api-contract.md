@@ -12,7 +12,7 @@
 | GET | `/api/tickets?status={status}&page={page}&size={size}&sort={sort}` | Xem danh sách phiếu, lọc trạng thái, phân trang và sắp xếp theo mã phiếu |
 | GET | `/api/tickets/{ticket_id}` | Lấy thông tin chi tiết một phiếu |
 | PUT | `/api/tickets/{ticket_id}` | Sửa mô tả lỗi, nhóm sự cố và mức ưu tiên của phiếu chưa đóng |
-| PATCH | `/api/tickets/{ticket_id}/status` | Đóng phiếu đang ở trạng thái Hoàn tất và ghi log chuyển trạng thái |
+| PATCH | `/api/tickets/{ticket_id}/status` | Đóng phiếu chưa ở trạng thái Đã đóng và ghi log chuyển trạng thái |
 
 ## Quy ước chung
 
@@ -222,7 +222,7 @@ Response `200 OK` trả thông tin chi tiết phiếu sau cập nhật.
 
 ### PATCH /api/tickets/{ticket_id}/status
 
-Chỉ hỗ trợ chuyển trạng thái từ `HOAN_TAT` sang `DA_DONG`.
+Cho phép chuyển phiếu ở mọi trạng thái hiện tại sang `DA_DONG`, ngoại trừ phiếu đã ở trạng thái `DA_DONG`.
 
 **Request body**
 
@@ -230,7 +230,7 @@ Chỉ hỗ trợ chuyển trạng thái từ `HOAN_TAT` sang `DA_DONG`.
 { "status": "DA_DONG" }
 ```
 
-Khi cập nhật thành công, hệ thống đặt `closed_at` và ghi `ticket_status_log` với `from_status = 'HOAN_TAT'`, `to_status = 'DA_DONG'`, cùng thời điểm thay đổi. Cập nhật phiếu và ghi log dùng chung transaction; `changed_by = 0` vì phiên bản hiện tại chưa có đăng nhập/nhân viên.
+Khi cập nhật thành công, hệ thống đặt `closed_at` và ghi `ticket_status_log` với `from_status` là trạng thái thực tế trước khi đóng, `to_status = 'DA_DONG'`, cùng thời điểm thay đổi. Cập nhật phiếu và ghi log dùng chung transaction; `changed_by = 0` vì phiên bản hiện tại chưa có đăng nhập/nhân viên.
 
 **Response 200 OK**
 
@@ -242,7 +242,7 @@ Khi cập nhật thành công, hệ thống đặt `closed_at` và ghi `ticket_s
 }
 ```
 
-**Lỗi có thể trả về:** `400 VALIDATION_FAILED` nếu trạng thái đích khác `DA_DONG`; `404 NOT_FOUND` nếu phiếu không tồn tại; `409 INVALID_STATUS_TRANSITION` nếu phiếu chưa ở trạng thái `HOAN_TAT`.
+**Lỗi có thể trả về:** `400 VALIDATION_FAILED` nếu trạng thái đích khác `DA_DONG`; `404 NOT_FOUND` nếu phiếu không tồn tại; `409 INVALID_STATUS_TRANSITION` nếu phiếu đã ở trạng thái `DA_DONG`.
 
 ## Tóm tắt validation theo endpoint
 
@@ -255,4 +255,4 @@ Khi cập nhật thành công, hệ thống đặt `closed_at` và ghi `ticket_s
 | `GET /api/tickets` | Trạng thái hợp lệ; `page` dương; `size` từ 1 đến 100; `sort` thuộc danh sách giá trị hỗ trợ | Validator |
 | `GET /api/tickets/{ticket_id}` | Mã phiếu là số nguyên dương | Validator |
 | `PUT /api/tickets/{ticket_id}` | Mô tả lỗi không rỗng; nhóm sự cố và mức ưu tiên hợp lệ | Validator; phiếu đã đóng/hủy và danh mục tồn tại ở service/repository |
-| `PATCH /api/tickets/{ticket_id}/status` | Chỉ nhận trạng thái đích `DA_DONG`; phiếu hiện tại phải `HOAN_TAT` | Validator và service; cập nhật kèm log trong repository |
+| `PATCH /api/tickets/{ticket_id}/status` | Chỉ nhận trạng thái đích `DA_DONG`; phiếu hiện tại chưa được đóng | Validator và service; cập nhật kèm log trong repository |

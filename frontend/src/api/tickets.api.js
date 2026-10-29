@@ -32,7 +32,7 @@ export const phieuApi = {
       method: "PUT",
       body: JSON.stringify(duLieu),
     }),
-  /** Đóng phiếu đã hoàn tất. */
+  /** Đóng phiếu chưa ở trạng thái Đã đóng. */
   dongPhieu: (maPhieu) =>
     guiYeuCau(`/api/tickets/${maPhieu}/status`, {
       method: "PATCH",

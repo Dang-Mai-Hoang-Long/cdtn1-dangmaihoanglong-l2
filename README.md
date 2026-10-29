@@ -6,7 +6,7 @@ Luồng nghiệp vụ: L2 – Tiếp nhận và phân loại yêu cầu bảo h�
 
 ## 1. Mục tiêu
 
-Mô tả: Nhân viên tiếp nhận tra cứu khách hàng và thiết bị, ghi nhận mô tả lỗi, phân loại nhóm sự cố, xác định mức ưu tiên, xem hạn cam kết và tạo phiếu ở trạng thái ban đầu. Bản hiện tại mở rộng nút Chi tiết để xem/sửa thông tin tiếp nhận và đóng phiếu sau khi hoàn tất; không có chức năng phân công kỹ thuật viên.
+Mô tả: Nhân viên tiếp nhận tra cứu khách hàng và thiết bị, ghi nhận mô tả lỗi, phân loại nhóm sự cố, xác định mức ưu tiên, xem hạn cam kết và tạo phiếu ở trạng thái ban đầu. Bản hiện tại mở rộng nút Chi tiết để xem/sửa thông tin tiếp nhận và đóng phiếu ở mọi trạng thái trừ Đã đóng; không có chức năng phân công kỹ thuật viên.
 
 ## 2. Yêu cầu môi trường
 
@@ -74,6 +74,6 @@ Bộ kiểm thử hiện có 9 ca `TC-01` đến `TC-09`, dùng dữ liệu/đ�
 
 ## 6. Trạng thái hiện tại
 
-- [x] Module L2 tiếp nhận và phân loại: tra cứu khách hàng/thiết bị, kiểm tra dữ liệu, xem trước và tạo phiếu, tính hạn cam kết, xem/lọc danh sách, xem/sửa chi tiết và đóng phiếu đã hoàn tất.
+- [x] Module L2 tiếp nhận và phân loại: tra cứu khách hàng/thiết bị, kiểm tra dữ liệu, xem trước và tạo phiếu, tính hạn cam kết, xem/lọc danh sách, xem/sửa chi tiết và đóng phiếu ở mọi trạng thái trừ Đã đóng.
 - [x] Dựng cơ sở dữ liệu bằng migrations, nạp dữ liệu mẫu bằng seeds và có bộ kiểm thử nghiệp vụ.
 - [ ] Đóng gói bằng docker

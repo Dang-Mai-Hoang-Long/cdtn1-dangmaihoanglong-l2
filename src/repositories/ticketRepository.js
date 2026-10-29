@@ -118,10 +118,11 @@ export default class KhoPhieu {
         await ketNoi.query("ROLLBACK");
         return null;
       }
-      if (rows[0].status !== "HOAN_TAT") {
+      if (rows[0].status === "DA_DONG") {
         await ketNoi.query("ROLLBACK");
-        return { khongTheDong: true, trangThai: rows[0].status };
+        return { daDong: true, trangThai: rows[0].status };
       }
+      const trangThaiTruoc = rows[0].status;
 
       const { rows: phieuDaDong } = await ketNoi.query(
         `
@@ -137,9 +138,9 @@ export default class KhoPhieu {
         `
         INSERT INTO ticket_status_log (
           ticket_id, from_status, to_status, changed_at, changed_by, note
-        ) VALUES ($1, 'HOAN_TAT', 'DA_DONG', $2, 0, $3)
+        ) VALUES ($1, $2, 'DA_DONG', $3, 0, $4)
       `,
-        [phieu.ticket_id, phieu.closed_at, "Đóng phiếu sau khi hoàn tất."],
+        [phieu.ticket_id, trangThaiTruoc, phieu.closed_at, `Đóng phiếu từ trạng thái ${trangThaiTruoc}.`],
       );
       await ketNoi.query("COMMIT");
       return phieu;

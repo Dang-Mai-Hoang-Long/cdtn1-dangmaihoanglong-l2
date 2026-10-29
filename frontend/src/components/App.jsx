@@ -94,6 +94,7 @@ export default function UngDung() {
   const [loiTaiChiTiet, datLoiTaiChiTiet] = useState(false);
   const [dangSuaPhieu, datDangSuaPhieu] = useState(false);
   const [lanCapNhatDanhSach, datLanCapNhatDanhSach] = useState(0);
+  const [lanTaoPhieuMoi, datLanTaoPhieuMoi] = useState(0);
 
   useEffect(() => {
     if (manHinhHienTai !== "taoPhieu") return;
@@ -366,6 +367,8 @@ export default function UngDung() {
     datThongBao("");
     try {
       await phieuApi.xacNhanTaoPhieu(lapDuLieuGui(phieuXemTruoc));
+      datLanCapNhatDanhSach((soLan) => soLan + 1);
+      datLanTaoPhieuMoi((soLan) => soLan + 1);
       xoaBanNhap();
       datDuLieuPhieu(duLieuPhieuRong);
       datPhieuXemTruoc(null);
@@ -500,6 +503,7 @@ export default function UngDung() {
           khiTaoPhieu={batDauTaoPhieu}
           khiXemChiTiet={moChiTietPhieu}
           lanCapNhatNgoai={lanCapNhatDanhSach}
+          lanTaoPhieuMoi={lanTaoPhieuMoi}
         />
       </div>
       {manHinhHienTai === "taoPhieu" && (

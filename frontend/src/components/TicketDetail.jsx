@@ -65,7 +65,7 @@ export default function ChiTietPhieu({
               Chỉnh sửa
             </button>
           )}
-          {phieu.status === "HOAN_TAT" && !coLoiTaiChiTiet && (
+          {phieu.status !== "DA_DONG" && !coLoiTaiChiTiet && (
             <button className="nut nutChinh nutDongPhieu" type="button" onClick={khiDongPhieu} disabled={dangXuLy}>
               {dangXuLy ? "Đang đóng..." : "Đóng phiếu"}
             </button>

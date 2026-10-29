@@ -151,10 +151,10 @@ export default class DichVuPhieu {
   async dongPhieu(maPhieu) {
     const ketQua = await this.khoPhieu.dongPhieu(maPhieu);
     if (!ketQua) throw new LoiUngDung("NOT_FOUND", "Không tìm thấy phiếu bảo hành.");
-    if (ketQua.khongTheDong) {
+    if (ketQua.daDong) {
       throw new LoiUngDung(
         "INVALID_STATUS_TRANSITION",
-        "Chỉ có thể đóng phiếu đang ở trạng thái Hoàn tất.",
+        "Phiếu đã được đóng trước đó.",
       );
     }
     return ketQua;

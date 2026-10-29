@@ -11,7 +11,12 @@ const tenTrangThai = {
   DA_HUY: "Đã hủy",
 };
 
-export default function DanhSachPhieu({ khiTaoPhieu, khiXemChiTiet, lanCapNhatNgoai = 0 }) {
+export default function DanhSachPhieu({
+  khiTaoPhieu,
+  khiXemChiTiet,
+  lanCapNhatNgoai = 0,
+  lanTaoPhieuMoi = 0,
+}) {
   const [cacPhieu, datCacPhieu] = useState([]);
   const [dangTai, datDangTai] = useState(true);
   const [loiTai, datLoiTai] = useState(null);
@@ -24,6 +29,13 @@ export default function DanhSachPhieu({ khiTaoPhieu, khiXemChiTiet, lanCapNhatNg
 
   const tongSoTrang = Math.max(1, Math.ceil(tongSo / kichThuoc));
   const trangVuotQuaCuoi = trang > tongSoTrang;
+
+  useEffect(() => {
+    if (lanTaoPhieuMoi === 0) return;
+    datTrangThaiLoc("");
+    datTrang(1);
+    datSoLanTaiLai((soLan) => soLan + 1);
+  }, [lanTaoPhieuMoi]);
 
   useEffect(() => {
     const boDieuKhien = new AbortController();
