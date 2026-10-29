@@ -1,4 +1,5 @@
--- Nhom co dinh: 30 thiet bi de demo; 10 dau chua co phieu, 20 sau co phieu.
+-- Nhom co dinh: 50 thiet bi; 10 dau chua co phieu, 20 sau co phieu,
+-- 10 thiet bi het han bao hanh va 10 thiet bi chua co ngay mua.
 WITH du_lieu_co_dinh AS (
     SELECT mau.*, kh.customer_id
     FROM (VALUES
@@ -31,7 +32,27 @@ WITH du_lieu_co_dinh AS (
         (27, 'DEMO-L2-FIXED-0027', '0999000025', 3, 220, 12),
         (28, 'DEMO-L2-FIXED-0028', '0999000026', 1, 250, 12),
         (29, 'DEMO-L2-FIXED-0029', '0999000027', 2, 270, 12),
-        (30, 'DEMO-L2-FIXED-0030', '0999000028', 3, 290, 12)
+        (30, 'DEMO-L2-FIXED-0030', '0999000028', 3, 290, 12),
+        (31, 'DEMO-L2-FIXED-0031', '0999000029', 1, 400, 6),
+        (32, 'DEMO-L2-FIXED-0032', '0999000030', 2, 400, 6),
+        (33, 'DEMO-L2-FIXED-0033', '0999000031', 3, 400, 6),
+        (34, 'DEMO-L2-FIXED-0034', '0999000032', 1, 400, 6),
+        (35, 'DEMO-L2-FIXED-0035', '0999000033', 2, 400, 6),
+        (36, 'DEMO-L2-FIXED-0036', '0999000034', 3, 400, 6),
+        (37, 'DEMO-L2-FIXED-0037', '0999000035', 1, 400, 6),
+        (38, 'DEMO-L2-FIXED-0038', '0999000036', 2, 400, 6),
+        (39, 'DEMO-L2-FIXED-0039', '0999000037', 3, 400, 6),
+        (40, 'DEMO-L2-FIXED-0040', '0999000038', 1, 400, 6),
+        (41, 'DEMO-L2-FIXED-0041', '0999000039', 2, NULL, 12),
+        (42, 'DEMO-L2-FIXED-0042', '0999000040', 3, NULL, 12),
+        (43, 'DEMO-L2-FIXED-0043', '0999000041', 1, NULL, 12),
+        (44, 'DEMO-L2-FIXED-0044', '0999000042', 2, NULL, 12),
+        (45, 'DEMO-L2-FIXED-0045', '0999000043', 3, NULL, 12),
+        (46, 'DEMO-L2-FIXED-0046', '0999000044', 1, NULL, 12),
+        (47, 'DEMO-L2-FIXED-0047', '0999000045', 2, NULL, 12),
+        (48, 'DEMO-L2-FIXED-0048', '0999000046', 3, NULL, 12),
+        (49, 'DEMO-L2-FIXED-0049', '0999000047', 1, NULL, 12),
+        (50, 'DEMO-L2-FIXED-0050', '0999000048', 2, NULL, 12)
     ) AS mau(so_thu_tu, serial_no, phone, product_id, so_ngay_tu_ngay_mua, warranty_months)
     JOIN customer kh ON kh.phone = mau.phone
 )
