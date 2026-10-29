@@ -12,16 +12,18 @@ Mô tả: Nhân viên tiếp nhận tra cứu khách hàng và thiết bị, ghi
 
 - Node.js 20 trở lên
 - PostgreSQL 16
-- Biến kết nối PostgreSQL: `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` trong `.env`. Có thể dùng `DATABASE_URL` thay cho các biến kết nối riêng.
-- Cổng API mặc định là `3001`; giao diện Vite mặc định ở `5173`. Có thể đổi cổng API bằng `PORT`.
+- Biến kết nối PostgreSQL: `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` trong `.env`; có thể dùng `DATABASE_URL` thay thế nhóm biến này.
+- API mặc định chạy ở cổng `3001` (`API_PORT`, hoặc `PORT` nếu không khai báo `API_PORT`); Vite mặc định chạy ở cổng `5173` (`VITE_PORT`).
+- `.env.example` chứa giá trị mẫu. Hãy thay `DB_PASSWORD` bằng mật khẩu PostgreSQL trên máy trước khi chạy.
 - Không đưa thông tin kết nối thật hoặc khóa bí mật vào Git.
 
 ## 3. Hướng dẫn chạy
 
-1. Tạo `.env` từ mẫu bằng PowerShell: `Copy-Item .env.example .env` (hoặc dùng `cp .env.example .env` trên macOS/Linux), rồi điền thông tin PostgreSQL.
-2. Cài các gói cần thiết: `npm install`.
-3. Khi PostgreSQL đang chạy, tạo bảng và nạp dữ liệu mẫu: `npm run db:setup`.
-4. Khởi động API và giao diện: `npm run dev`. Mở giao diện tại http://localhost:5173; kiểm tra API tại http://localhost:3001/health.
+1. Tạo `.env` từ mẫu trong PowerShell: `Copy-Item .env.example .env` (macOS/Linux: `cp .env.example .env`), rồi thay `DB_PASSWORD` bằng mật khẩu PostgreSQL của máy.
+2. Mở pgAdmin, kết nối tới máy chủ PostgreSQL, nhấp phải **Databases** → **Create** → **Database...**. Nhập `mekong_mobile_l2` vào **Database**, chọn tài khoản PostgreSQL của bạn ở **Owner**, rồi nhấn **Save**. Nếu đặt tên database hoặc tài khoản khác, cập nhật `DB_NAME` hoặc `DB_USER` tương ứng trong `.env`.
+3. Cài các gói cần thiết: `npm install`.
+4. Tạo cấu trúc bảng và nạp dữ liệu mẫu: `npm run db:setup`.
+5. Khởi động API và giao diện: `npm run dev`. Mở giao diện tại http://localhost:5173; kiểm tra API tại http://localhost:3001/health.
 
 ## 4. Cấu trúc thư mục
 
@@ -62,7 +64,7 @@ Chạy toàn bộ kiểm thử bằng một lệnh:
 npm test
 ```
 
-Bộ kiểm thử hiện có 10 ca `TC-01` đến `TC-09`, dùng dữ liệu/đối tượng giả nên không cần kết nối PostgreSQL. Kết quả thành công hiển thị số ca `pass` và `fail` trong terminal.
+Bộ kiểm thử hiện có 9 ca `TC-01` đến `TC-09`, dùng dữ liệu/đối tượng giả nên không cần kết nối PostgreSQL. Kết quả thành công hiển thị số ca `pass` và `fail` trong terminal.
 
 ## 6. Trạng thái hiện tại
 
