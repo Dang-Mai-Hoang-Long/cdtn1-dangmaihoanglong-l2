@@ -66,8 +66,29 @@ Compose mặc định dùng mật khẩu demo cục bộ `mekong_mobile_l2_dev`.
 ├── migrations/                        # Các bước tạo cấu trúc cơ sở dữ liệu
 ├── seeds/                             # Dữ liệu mẫu
 ├── scripts/                           # Chạy migration và seed
-├── tests/                             # Kiểm thử nghiệp vụ bằng Node.js Test Runner
-├── docs/                              # SRS, hợp đồng API, sơ đồ và thay đổi thiết kế
+├── tests/                             # Kiểm thử bằng Node.js Test Runner
+│   ├── customerService.test.js         # Che số điện thoại khách hàng (TC-10)
+│   ├── dbSetup.test.js                 # Chạy lại migration và seed (TC-12)
+│   ├── errorHandler.test.js            # Không lộ chi tiết lỗi nội bộ (TC-11)
+│   ├── ticketService.test.js           # Kiểm thử nghiệp vụ phiếu
+│   ├── ticketValidator.test.js         # Kiểm thử dữ liệu đầu vào
+│   └── warrantyRules.test.js           # Kiểm thử quy tắc bảo hành
+├── docs/                              # Tài liệu dự án
+│   ├── ai-disclosure.md                # Khai báo sử dụng AI
+│   ├── api-contract.md                 # Hợp đồng API
+│   ├── api-docs/                       # Tài liệu API tiếng Anh theo BT3
+│   │   └── .gitkeep
+│   ├── bug-log.md                      # Bug Log
+│   ├── checklist-bao-mat.md            # Checklist bảo mật
+│   ├── deployment-guide.md             # Deployment Guide
+│   ├── srs.md                          # Đặc tả yêu cầu
+│   ├── test-plan.md                    # Test Plan
+│   ├── test-report.md                  # Test Report
+│   ├── thay-doi-thiet-ke.md            # Nhật ký thay đổi thiết kế
+│   ├── architecture-thuc-te.drawio     # Sơ đồ kiến trúc
+│   ├── erd.drawio                      # Sơ đồ dữ liệu
+│   ├── usecase.drawio                  # Sơ đồ use case
+│   └── wireframe.png                   # Wireframe giao diện
 ├── package.json                       # Scripts và khai báo thư viện của dự án
 └── vite.config.js                     # Cấu hình Vite và proxy API khi phát triển
 ```
