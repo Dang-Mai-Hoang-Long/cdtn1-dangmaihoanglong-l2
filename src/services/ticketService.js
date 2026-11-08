@@ -1,6 +1,32 @@
 import LoiUngDung from "../errors/AppError.js";
 import { conHanBaoHanh } from "./warrantyRules.js";
 
+function layCacTrungTamDuocPhep(nguoiDung) {
+  if (nguoiDung?.role === "QUAN_LY") {
+    const cacMaTrungTam = nguoiDung.center_ids;
+    if (
+      !Array.isArray(cacMaTrungTam) ||
+      cacMaTrungTam.some((ma) => !Number.isSafeInteger(Number(ma)) || Number(ma) < 0)
+    ) {
+      throw new LoiUngDung("FORBIDDEN", "Bạn không có quyền thực hiện thao tác này.");
+    }
+    return [...new Set(cacMaTrungTam.map(Number))];
+  }
+
+  const maTrungTam = Number(nguoiDung?.center_id);
+  if (nguoiDung?.role !== "NHAN_VIEN_TIEP_NHAN" || !Number.isSafeInteger(maTrungTam) || maTrungTam < 0) {
+    throw new LoiUngDung("FORBIDDEN", "Bạn không có quyền thực hiện thao tác này.");
+  }
+  return [maTrungTam];
+}
+
+function cheSoDienThoai(soDienThoai) {
+  const soDaChuanHoa = String(soDienThoai || "");
+  return soDaChuanHoa.length >= 7
+    ? `${soDaChuanHoa.slice(0, 3)}****${soDaChuanHoa.slice(-3)}`
+    : "";
+}
+
 function tinhHanCamKet(thoiDiemNhan, mucUuTien) {
   const gioXuLy = { CAO: 24, TRUNG_BINH: 72, THAP: 120 }[mucUuTien];
   const hanCamKet = new Date(thoiDiemNhan);
@@ -21,8 +47,11 @@ export default class DichVuPhieu {
     this.khoPhieu = khoPhieu;
   }
 
-  layDanhSachPhieu(tuyChonDanhSach) {
-    return this.khoPhieu.layDanhSach(tuyChonDanhSach);
+  layDanhSachPhieu(tuyChonDanhSach, nguoiDung) {
+    return this.khoPhieu.layDanhSach({
+      ...tuyChonDanhSach,
+      centerIds: layCacTrungTamDuocPhep(nguoiDung),
+    });
   }
 
   layDanhMucSuCo() {
@@ -119,14 +148,20 @@ export default class DichVuPhieu {
     }
   }
 
-  async layChiTietPhieu(maPhieu) {
-    const phieu = await this.khoPhieu.layChiTiet(maPhieu);
+  async layChiTietPhieu(maPhieu, nguoiDung) {
+    const cacMaTrungTam = layCacTrungTamDuocPhep(nguoiDung);
+    const phieu = await this.khoPhieu.layChiTiet(maPhieu, cacMaTrungTam);
     if (!phieu) throw new LoiUngDung("NOT_FOUND", "Không tìm thấy phiếu bảo hành.");
-    return phieu;
+    if (nguoiDung.role === "QUAN_LY") return phieu;
+    return {
+      ...phieu,
+      customer_phone: cheSoDienThoai(phieu.customer_phone),
+    };
   }
 
-  async capNhatPhieu(maPhieu, duLieu) {
-    const phieuHienTai = await this.layChiTietPhieu(maPhieu);
+  async capNhatPhieu(maPhieu, duLieu, nguoiDung) {
+    const cacMaTrungTam = layCacTrungTamDuocPhep(nguoiDung);
+    const phieuHienTai = await this.layChiTietPhieu(maPhieu, nguoiDung);
     if (["DA_DONG", "DA_HUY"].includes(phieuHienTai.status)) {
       throw new LoiUngDung("TICKET_NOT_EDITABLE", "Phiếu đã đóng hoặc đã hủy, không thể chỉnh sửa.");
     }
@@ -141,15 +176,28 @@ export default class DichVuPhieu {
     const phieuDaCapNhat = await this.khoPhieu.capNhatThongTin(maPhieu, {
       ...duLieu,
       due_date: tinhHanCamKet(phieuHienTai.received_at, duLieu.priority),
-    });
+    }, cacMaTrungTam);
     if (!phieuDaCapNhat) {
       throw new LoiUngDung("TICKET_NOT_EDITABLE", "Phiếu đã đóng hoặc đã hủy, không thể chỉnh sửa.");
     }
-    return phieuDaCapNhat;
+    return this.chuanHoaChiTietTheoVaiTro(phieuDaCapNhat, nguoiDung);
   }
 
-  async dongPhieu(maPhieu) {
-    const ketQua = await this.khoPhieu.dongPhieu(maPhieu);
+  chuanHoaChiTietTheoVaiTro(phieu, nguoiDung) {
+    if (!phieu || nguoiDung?.role === "QUAN_LY") return phieu;
+    return {
+      ...phieu,
+      customer_phone: cheSoDienThoai(phieu.customer_phone),
+    };
+  }
+
+  async dongPhieu(maPhieu, nguoiDung) {
+    const cacMaTrungTam = layCacTrungTamDuocPhep(nguoiDung);
+    const ketQua = await this.khoPhieu.dongPhieu(
+      maPhieu,
+      cacMaTrungTam,
+      nguoiDung.user_id,
+    );
     if (!ketQua) throw new LoiUngDung("NOT_FOUND", "Không tìm thấy phiếu bảo hành.");
     if (ketQua.daDong) {
       throw new LoiUngDung(

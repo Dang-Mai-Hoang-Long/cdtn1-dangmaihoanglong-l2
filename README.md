@@ -17,6 +17,7 @@ Mô tả: Nhân viên tiếp nhận tra cứu khách hàng và thiết bị, ghi
 - `.env.example` chứa giá trị mẫu. Hãy thay `DB_PASSWORD` bằng mật khẩu PostgreSQL trên máy trước khi chạy.
 - Có thể chạy bằng Docker Desktop và Docker Compose v2 thay cho việc cài Node.js/PostgreSQL trực tiếp.
 - Không đưa thông tin kết nối thật hoặc khóa bí mật vào Git.
+- Tài khoản ứng dụng được lưu trong PostgreSQL. Tạo tối thiểu một tài khoản nhân viên tiếp nhận; có thể tạo tài khoản quản lý riêng để xem dữ liệu.
 
 ## 3. Hướng dẫn chạy
 
@@ -28,9 +29,13 @@ Sau khi clone dự án, mở terminal tại thư mục gốc của dự án. Ki�
 
 3. Tại thư mục gốc dự án mở Terminal, cài thư viện bằng lệnh `npm install` (hoặc `npm ci` để cài sạch theo `package-lock.json`). Chỉ chạy một trong hai lệnh.
 
-4. Tạo cấu trúc bảng và nạp dữ liệu mẫu: `npm run db:setup`.
+4. Tạo cấu trúc bảng, nạp dữ liệu mẫu và năm tài khoản đăng nhập demo: `npm run db:setup`.
+
+   Tài khoản: `nv.trungtam-a.1`, `nv.trungtam-a.2` (Trung tâm A); `nv.trungtam-b.1`, `nv.trungtam-b.2` (Trung tâm B); `quanly` (quản lý). Mật khẩu dùng chung: `MekongL2Demo!2026`. Chạy lại `db:setup` sẽ đặt lại mật khẩu cho các username demo. Chỉ dùng các tài khoản này ở môi trường học tập/local.
 
 5. Khởi động API và giao diện: `npm run dev`. Mở giao diện tại http://localhost:5173; kiểm tra API tại http://localhost:3001/health.
+
+Để chạy riêng seed tài khoản demo sau này, dùng `npm run auth:seed-demo-users`. Để tạo tài khoản tùy chỉnh, điền `APP_USER_USERNAME`, `APP_USER_PASSWORD` (ít nhất 12 ký tự), `APP_USER_ROLE` (`NHAN_VIEN_TIEP_NHAN` hoặc `QUAN_LY`) và chạy `npm run auth:create-user`. Nhân viên cần đặt `APP_USER_CENTER_ID` (0 là Trung tâm A, 1 là Trung tâm B); tài khoản quản lý để trống biến này.
 
 ### Chạy bằng Docker
 
@@ -41,9 +46,11 @@ Sau khi clone dự án, mở terminal tại thư mục gốc của dự án. Ki�
 docker compose up --build
 ```
 
-Compose tự tạo PostgreSQL, chờ database sẵn sàng, chạy migrations và seeds, sau đó khởi động ứng dụng. Mở http://localhost:3001. Dữ liệu database được giữ trong volume `du-lieu-postgres` khi container dừng. Nếu muốn chạy nền, thêm `-d` vào lệnh; dừng các container bằng `docker compose down`.
+Compose tự tạo PostgreSQL, chờ database sẵn sàng, chạy migrations và seed dữ liệu nghiệp vụ, sau đó khởi động ứng dụng. Để thêm tài khoản demo vào database Docker, chạy `docker compose exec app node scripts/seedDemoUsers.js`. Mở http://localhost:3001. Dữ liệu database được giữ trong volume `du-lieu-postgres` khi container dừng. Nếu muốn chạy nền, thêm `-d` vào lệnh; dừng các container bằng `docker compose down`.
 
 Compose mặc định dùng mật khẩu demo cục bộ `mekong_mobile_l2_dev`. Có thể tạo `.env` từ `.env.example` và thay `DB_PASSWORD` trước khi chạy Docker.
+
+Tạo tài khoản tùy chỉnh trong Docker bằng cách đặt `APP_USER_*` trong `.env`, sau đó chạy `docker compose exec app node scripts/createUser.js`. `AUTH_COOKIE_SECURE=false` phù hợp với HTTP cục bộ; khi đặt sau HTTPS reverse proxy, bật `AUTH_COOKIE_SECURE=true`.
 
 ## 4. Cấu trúc thư mục
 
@@ -67,12 +74,14 @@ Compose mặc định dùng mật khẩu demo cục bộ `mekong_mobile_l2_dev`.
 ├── seeds/                             # Dữ liệu mẫu
 ├── scripts/                           # Chạy migration và seed
 ├── tests/                             # Kiểm thử bằng Node.js Test Runner
-│   ├── customerService.test.js         # Che số điện thoại khách hàng (TC-10)
-│   ├── dbSetup.test.js                 # Chạy lại migration và seed (TC-12)
-│   ├── errorHandler.test.js            # Không lộ chi tiết lỗi nội bộ (TC-11)
-│   ├── ticketService.test.js           # Kiểm thử nghiệp vụ phiếu
-│   ├── ticketValidator.test.js         # Kiểm thử dữ liệu đầu vào
-│   └── warrantyRules.test.js           # Kiểm thử quy tắc bảo hành
+│   ├── customers.service.test.js        # Tra cứu/chuẩn hóa và che số điện thoại
+│   ├── customers.api.test.js            # API tra cứu khách hàng
+│   ├── database.integration.test.js     # PostgreSQL, phân trang, che dữ liệu và TC-14
+│   ├── devices.api.test.js              # API tra cứu thiết bị
+│   ├── tickets.api.test.js              # API phiếu bảo hành
+│   ├── tickets.service.test.js           # Quy tắc nghiệp vụ phiếu
+│   ├── tickets.validation.test.js       # Kiểm tra dữ liệu đầu vào
+│   └── warranty.test.js                 # Các mốc biên bảo hành TC-05/TC-06
 ├── docs/                              # Tài liệu dự án
 │   ├── ai-disclosure.md                # Khai báo sử dụng AI
 │   ├── api-contract.md                 # Hợp đồng API
@@ -105,7 +114,7 @@ Chạy toàn bộ kiểm thử bằng một lệnh:
 npm test
 ```
 
-Bộ kiểm thử hiện có 9 ca `TC-01` đến `TC-09`, dùng dữ liệu/đối tượng giả nên không cần kết nối PostgreSQL. Kết quả thành công hiển thị số ca `pass` và `fail` trong terminal.
+Bộ kiểm thử hiện có 14 ca `TC-01` đến `TC-14`. Bốn ca tích hợp trong `database.integration.test.js` cần `TEST_DATABASE_URL` trỏ tới database riêng có hậu tố `_test`; các ca này dựng lại schema trong database đó. Không trỏ biến này vào database đang dùng để chạy ứng dụng. Nếu chưa đặt biến, bốn ca PostgreSQL sẽ bị bỏ qua.
 
 ## 6. Trạng thái hiện tại
 

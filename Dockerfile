@@ -25,4 +25,4 @@ COPY --from=build /app/dist ./dist
 
 EXPOSE 3001
 
-CMD ["sh", "-c", "npm run db:setup && node src/server.js"]
+CMD ["sh", "-c", "npm run db:migrate && npm run db:seed && node src/server.js"]

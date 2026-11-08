@@ -14,6 +14,9 @@ const tenTrangThai = {
 export default function DanhSachPhieu({
   khiTaoPhieu,
   khiXemChiTiet,
+  nguoiDung,
+  khiDangXuat,
+  loiDangXuat,
   lanCapNhatNgoai = 0,
   lanTaoPhieuMoi = 0,
 }) {
@@ -77,7 +80,11 @@ export default function DanhSachPhieu({
           <button
             className="nut nutTaoPhieu"
             type="button"
-            onClick={khiTaoPhieu}
+            onClick={() => {
+              if (nguoiDung?.role === "NHAN_VIEN_TIEP_NHAN") khiTaoPhieu();
+            }}
+            disabled={nguoiDung?.role !== "NHAN_VIEN_TIEP_NHAN"}
+            title={nguoiDung?.role === "QUAN_LY" ? "Quản lý chỉ được xem phiếu" : undefined}
           >
             + Tạo phiếu bảo hành
           </button>
@@ -278,7 +285,15 @@ export default function DanhSachPhieu({
           </div>
         </div>
       </div>
-      <p className="vaiTroTiepNhan">Nhân viên tiếp nhận</p>
+      <div className="vaiTroTiepNhan">
+        {loiDangXuat && <p className="thongBaoLoi" role="alert">{loiDangXuat}</p>}
+        <span>
+          {nguoiDung?.username} · {nguoiDung?.role === "QUAN_LY" ? "Quản lý" : "Nhân viên tiếp nhận"}
+        </span>
+        <button type="button" className="nutDangXuat" onClick={khiDangXuat}>
+          Đăng xuất
+        </button>
+      </div>
     </section>
   );
 }

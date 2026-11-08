@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
+import BieuMauDangNhap from "./LoginForm.jsx";
 import XacNhanPhieu from "./TicketConfirmation.jsx";
 import ChiTietPhieu from "./TicketDetail.jsx";
 import BieuMauPhieu from "./TicketForm.jsx";
 import DanhSachPhieu from "./TicketList.jsx";
 import { phieuApi } from "../api/tickets.api.js";
+import { xacThucApi } from "../api/auth.api.js";
 
 const cacManHinh = {
   danhSach: "danh-sach",
@@ -95,8 +97,32 @@ export default function UngDung() {
   const [dangSuaPhieu, datDangSuaPhieu] = useState(false);
   const [lanCapNhatDanhSach, datLanCapNhatDanhSach] = useState(0);
   const [lanTaoPhieuMoi, datLanTaoPhieuMoi] = useState(0);
+  const [nguoiDung, datNguoiDung] = useState(null);
+  const [dangTaiPhien, datDangTaiPhien] = useState(true);
+  const [dangDangNhap, datDangDangNhap] = useState(false);
+  const [loiDangNhap, datLoiDangNhap] = useState("");
+  const [loiDangXuat, datLoiDangXuat] = useState("");
 
   useEffect(() => {
+    let conHieuLuc = true;
+    xacThucApi
+      .layNguoiDung()
+      .then((ketQua) => {
+        if (conHieuLuc) datNguoiDung(ketQua.user);
+      })
+      .catch(() => {
+        if (conHieuLuc) datNguoiDung(null);
+      })
+      .finally(() => {
+        if (conHieuLuc) datDangTaiPhien(false);
+      });
+    return () => {
+      conHieuLuc = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!nguoiDung || nguoiDung.role !== "NHAN_VIEN_TIEP_NHAN") return;
     if (manHinhHienTai !== "taoPhieu") return;
     const coDuLieu = Boolean(
       duLieuPhieu.phone ||
@@ -119,16 +145,17 @@ export default function UngDung() {
     } catch {
       /* Form vẫn hoạt động nếu Storage hết dung lượng hoặc bị trình duyệt chặn. */
     }
-  }, [duLieuPhieu, manHinhHienTai]);
+  }, [duLieuPhieu, manHinhHienTai, nguoiDung]);
 
   useEffect(() => {
+    if (!nguoiDung) return;
     phieuApi
       .layDanhMucSuCo()
       .then(datDanhMuc)
       .catch(() =>
         datThongBao("Không thể tải danh mục sự cố. Vui lòng tải lại trang."),
       );
-  }, []);
+  }, [nguoiDung]);
 
   useEffect(() => {
     const dongBoManHinh = () => datManHinhHienTai(layManHinhTuHash());
@@ -137,6 +164,7 @@ export default function UngDung() {
   }, []);
 
   useEffect(() => {
+    if (!nguoiDung) return;
     const ketQuaHash = window.location.hash.match(/^#chi-tiet-phieu\/(\d+)$/);
     if (!ketQuaHash) return;
 
@@ -149,7 +177,7 @@ export default function UngDung() {
         datThongBao(loi.message || "Không thể tải chi tiết phiếu.");
       })
       .finally(() => datDangTaiChiTiet(false));
-  }, []);
+  }, [nguoiDung]);
 
   function chuyenManHinh(manHinhTiepTheo, maPhieu) {
     const duoiHash =
@@ -162,6 +190,17 @@ export default function UngDung() {
     else window.location.hash = hashTiepTheo;
     window.scrollTo(0, 0);
   }
+
+  useEffect(() => {
+    if (
+      nguoiDung?.role === "QUAN_LY" &&
+      ["taoPhieu", "xacNhan"].includes(manHinhHienTai)
+    ) {
+      datDangSuaPhieu(false);
+      datPhieuXemTruoc(null);
+      chuyenManHinh("danhSach");
+    }
+  }, [nguoiDung, manHinhHienTai]);
 
   function thayDoiTruong(tenTruong, giaTri) {
     const mucUuTienMacDinh =
@@ -295,7 +334,6 @@ export default function UngDung() {
     return {
       customer_id: phieu.customer_id,
       device_id: phieu.device_id,
-      center_id: 0,
       issue_desc: phieu.issue_desc,
       category_id: Number(phieu.category_id),
       ...(phieu.priority ? { priority: phieu.priority } : {}),
@@ -306,6 +344,7 @@ export default function UngDung() {
 
   async function kiemTraVaXemTruoc(suKien) {
     suKien.preventDefault();
+    if (nguoiDung?.role !== "NHAN_VIEN_TIEP_NHAN") return;
     const loiMoi = {};
     if (!duLieuPhieu.customer_id)
       loiMoi.phone = "Vui lòng tra cứu và chọn khách hàng";
@@ -362,6 +401,7 @@ export default function UngDung() {
   }
 
   async function xacNhanTaoPhieu() {
+    if (nguoiDung?.role !== "NHAN_VIEN_TIEP_NHAN") return;
     if (!phieuXemTruoc || dangXuLy) return;
     datDangXuLy(true);
     datThongBao("");
@@ -389,6 +429,7 @@ export default function UngDung() {
   }
 
   function batDauTaoPhieu() {
+    if (nguoiDung?.role !== "NHAN_VIEN_TIEP_NHAN") return;
     datDangSuaPhieu(false);
     datDuLieuPhieu(duLieuPhieuRong);
     datLoiTruong({});
@@ -415,6 +456,7 @@ export default function UngDung() {
   }
 
   function batDauChinhSuaPhieu() {
+    if (nguoiDung?.role !== "NHAN_VIEN_TIEP_NHAN") return;
     if (!phieuDangXem) return;
     datDuLieuPhieu({
       ...duLieuPhieuRong,
@@ -430,6 +472,7 @@ export default function UngDung() {
 
   async function luuThayDoiPhieu(suKien) {
     suKien.preventDefault();
+    if (nguoiDung?.role !== "NHAN_VIEN_TIEP_NHAN") return;
     if (!phieuDangXem || dangXuLy) return;
     const loiMoi = {};
     if (!duLieuPhieu.issue_desc.trim())
@@ -468,6 +511,7 @@ export default function UngDung() {
   }
 
   async function dongPhieuDangXem() {
+    if (nguoiDung?.role !== "NHAN_VIEN_TIEP_NHAN") return;
     if (!phieuDangXem || dangXuLy) return;
     if (!window.confirm(`Đóng phiếu ${phieuDangXem.ticket_code}?`)) return;
     datDangXuLy(true);
@@ -496,10 +540,66 @@ export default function UngDung() {
     chuyenManHinh("chiTietPhieu");
   }
 
+  async function dangNhap(tenDangNhap, matKhau) {
+    datDangDangNhap(true);
+    datLoiDangNhap("");
+    try {
+      const ketQua = await xacThucApi.dangNhap(tenDangNhap, matKhau);
+      datNguoiDung(ketQua.user);
+      if (ketQua.user.role === "QUAN_LY") {
+        datManHinhHienTai("danhSach");
+        window.location.hash = "#danh-sach";
+      }
+    } catch (loi) {
+      datLoiDangNhap(loi.message || "Không thể đăng nhập lúc này.");
+    } finally {
+      datDangDangNhap(false);
+    }
+  }
+
+  async function dangXuat() {
+    try {
+      await xacThucApi.dangXuat();
+      datLoiDangXuat("");
+      xoaBanNhap();
+      datNguoiDung(null);
+      datDuLieuPhieu(duLieuPhieuRong);
+      datPhieuXemTruoc(null);
+      datPhieuDangXem(null);
+      datDangSuaPhieu(false);
+      datManHinhHienTai("danhSach");
+      window.location.hash = "#danh-sach";
+    } catch (loi) {
+      datLoiDangXuat(loi.message || "Không thể đăng xuất lúc này. Vui lòng thử lại.");
+    }
+  }
+
+  if (dangTaiPhien) {
+    return (
+      <main className="khungNoiDung manHinhDangNhap" role="status">
+        Đang kiểm tra phiên đăng nhập...
+      </main>
+    );
+  }
+  if (!nguoiDung) {
+    return (
+      <BieuMauDangNhap
+        khiDangNhap={dangNhap}
+        dangXuLy={dangDangNhap}
+        loi={loiDangNhap}
+      />
+    );
+  }
+
+  const coTheCapNhatPhieu = nguoiDung.role === "NHAN_VIEN_TIEP_NHAN";
+
   return (
     <main className="khungNoiDung">
       <div className={manHinhHienTai === "danhSach" ? "" : "an"}>
         <DanhSachPhieu
+          nguoiDung={nguoiDung}
+          khiDangXuat={dangXuat}
+          loiDangXuat={loiDangXuat}
           khiTaoPhieu={batDauTaoPhieu}
           khiXemChiTiet={moChiTietPhieu}
           lanCapNhatNgoai={lanCapNhatDanhSach}
@@ -551,6 +651,7 @@ export default function UngDung() {
           thongBaoThanhCong={thongBaoThanhCong}
           dangXuLy={dangXuLy || dangTaiChiTiet}
           coLoiTaiChiTiet={loiTaiChiTiet}
+          coTheCapNhat={coTheCapNhatPhieu}
           khiQuayLai={() => chuyenManHinh("danhSach")}
           khiChinhSua={batDauChinhSuaPhieu}
           khiDongPhieu={dongPhieuDangXem}

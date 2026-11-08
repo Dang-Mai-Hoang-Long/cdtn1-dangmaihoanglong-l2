@@ -24,6 +24,7 @@ export default function ChiTietPhieu({
   thongBaoThanhCong,
   dangXuLy,
   coLoiTaiChiTiet,
+  coTheCapNhat,
   khiQuayLai,
   khiChinhSua,
   khiDongPhieu,
@@ -39,6 +40,7 @@ export default function ChiTietPhieu({
         <dl className="nhomThongTin nhomThongTinChiTiet">
           <dt>Mã phiếu</dt><dd>{phieu.ticket_code}</dd>
           <dt>Khách hàng</dt><dd>{phieu.customer_name || "—"}</dd>
+          <dt>Số điện thoại</dt><dd>{phieu.customer_phone || "—"}</dd>
           <dt>Mã thiết bị</dt><dd>{phieu.serial_no || "—"}</dd>
           <dt>Mô tả lỗi</dt><dd>{phieu.issue_desc || "—"}</dd>
           <dt>Nhóm sự cố</dt><dd>{phieu.category_name || "—"}</dd>
@@ -60,12 +62,12 @@ export default function ChiTietPhieu({
           <button className="nut nutPhu" type="button" onClick={khiQuayLai} disabled={dangXuLy}>
             Quay lại
           </button>
-          {coTheChinhSua && !coLoiTaiChiTiet && (
+          {coTheCapNhat && coTheChinhSua && !coLoiTaiChiTiet && (
             <button className="nut nutPhu" type="button" onClick={khiChinhSua} disabled={dangXuLy}>
               Chỉnh sửa
             </button>
           )}
-          {phieu.status !== "DA_DONG" && !coLoiTaiChiTiet && (
+          {coTheCapNhat && phieu.status !== "DA_DONG" && !coLoiTaiChiTiet && (
             <button className="nut nutChinh nutDongPhieu" type="button" onClick={khiDongPhieu} disabled={dangXuLy}>
               {dangXuLy ? "Đang đóng..." : "Đóng phiếu"}
             </button>

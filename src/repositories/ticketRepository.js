@@ -3,18 +3,31 @@ export default class KhoPhieu {
     this.boKetNoi = boKetNoi;
   }
 
-  async layDanhSach({ trangThai, trang = 1, kichThuoc = 20, thuTuMaPhieu } = {}) {
+  async layDanhSach({
+    trangThai,
+    trang = 1,
+    kichThuoc = 20,
+    thuTuMaPhieu,
+    centerIds,
+    centerId,
+  } = {}) {
     const cacThamSoLoc = [];
-    let dieuKienTrangThai = "";
+    const cacDieuKien = [];
     if (trangThai) {
       cacThamSoLoc.push(trangThai);
-      dieuKienTrangThai = "WHERE t.status = $1";
+      cacDieuKien.push(`t.status = $${cacThamSoLoc.length}`);
     }
+    const cacTrungTam = centerIds ?? (centerId === undefined || centerId === null ? null : [centerId]);
+    if (cacTrungTam !== null) {
+      cacThamSoLoc.push(cacTrungTam);
+      cacDieuKien.push(`t.center_id = ANY($${cacThamSoLoc.length}::BIGINT[])`);
+    }
+    const dieuKien = cacDieuKien.length ? `WHERE ${cacDieuKien.join(" AND ")}` : "";
     const ketQuaDem = await this.boKetNoi.query(
       `
       SELECT COUNT(*)::int AS total
       FROM ticket t
-      ${dieuKienTrangThai}
+      ${dieuKien}
     `,
       cacThamSoLoc,
     );
@@ -49,7 +62,7 @@ export default class KhoPhieu {
       JOIN customer c ON c.customer_id = t.customer_id
       JOIN device d ON d.device_id = t.device_id
       LEFT JOIN issue_category ic ON ic.category_id = t.category_id
-      ${dieuKienTrangThai}
+      ${dieuKien}
       ORDER BY ${thuTuSql}
       LIMIT $${viTriKichThuoc} OFFSET $${viTriBatDau}
     `,
@@ -64,7 +77,18 @@ export default class KhoPhieu {
     };
   }
 
-  async layChiTiet(maPhieu) {
+  async layChiTiet(maPhieu, centerIds) {
+    const cacThamSo = [maPhieu];
+    let dieuKienTrungTam = "";
+    const cacTrungTam = Array.isArray(centerIds)
+      ? centerIds
+      : centerIds === undefined || centerIds === null
+        ? null
+        : [centerIds];
+    if (cacTrungTam !== null) {
+      cacThamSo.push(cacTrungTam);
+      dieuKienTrungTam = `AND t.center_id = ANY($${cacThamSo.length}::BIGINT[])`;
+    }
     const { rows } = await this.boKetNoi.query(
       `
       SELECT
@@ -72,6 +96,7 @@ export default class KhoPhieu {
         t.ticket_code,
         t.customer_id,
         c.full_name AS customer_name,
+        c.phone AS customer_phone,
         t.device_id,
         d.serial_no,
         t.center_id,
@@ -88,31 +113,55 @@ export default class KhoPhieu {
       JOIN device d ON d.device_id = t.device_id
       LEFT JOIN issue_category ic ON ic.category_id = t.category_id
       WHERE t.ticket_id = $1
+        ${dieuKienTrungTam}
     `,
-      [maPhieu],
+      cacThamSo,
     );
     return rows[0] || null;
   }
 
-  async capNhatThongTin(maPhieu, duLieu) {
+  async capNhatThongTin(maPhieu, duLieu, centerIds) {
+    const cacThamSo = [maPhieu, duLieu.issue_desc, duLieu.category_id, duLieu.priority, duLieu.due_date];
+    let dieuKienTrungTam = "";
+    const cacTrungTam = Array.isArray(centerIds)
+      ? centerIds
+      : centerIds === undefined || centerIds === null
+        ? null
+        : [centerIds];
+    if (cacTrungTam !== null) {
+      cacThamSo.push(cacTrungTam);
+      dieuKienTrungTam = `AND center_id = ANY($${cacThamSo.length}::BIGINT[])`;
+    }
     const { rowCount } = await this.boKetNoi.query(
       `
       UPDATE ticket
       SET issue_desc = $2, category_id = $3, priority = $4, due_date = $5
       WHERE ticket_id = $1 AND status NOT IN ('DA_DONG', 'DA_HUY')
+        ${dieuKienTrungTam}
     `,
-      [maPhieu, duLieu.issue_desc, duLieu.category_id, duLieu.priority, duLieu.due_date],
+      cacThamSo,
     );
-    return rowCount > 0 ? this.layChiTiet(maPhieu) : null;
+    return rowCount > 0 ? this.layChiTiet(maPhieu, cacTrungTam) : null;
   }
 
-  async dongPhieu(maPhieu) {
+  async dongPhieu(maPhieu, centerIds, maNguoiDung) {
     const ketNoi = await this.boKetNoi.connect();
     try {
       await ketNoi.query("BEGIN");
+      const cacThamSo = [maPhieu];
+      let dieuKienTrungTam = "";
+      const cacTrungTam = Array.isArray(centerIds)
+        ? centerIds
+        : centerIds === undefined || centerIds === null
+          ? null
+          : [centerIds];
+      if (cacTrungTam !== null) {
+        cacThamSo.push(cacTrungTam);
+        dieuKienTrungTam = `AND center_id = ANY($${cacThamSo.length}::BIGINT[])`;
+      }
       const { rows } = await ketNoi.query(
-        "SELECT status FROM ticket WHERE ticket_id = $1 FOR UPDATE",
-        [maPhieu],
+        `SELECT status FROM ticket WHERE ticket_id = $1 ${dieuKienTrungTam} FOR UPDATE`,
+        cacThamSo,
       );
       if (!rows[0]) {
         await ketNoi.query("ROLLBACK");
@@ -138,9 +187,9 @@ export default class KhoPhieu {
         `
         INSERT INTO ticket_status_log (
           ticket_id, from_status, to_status, changed_at, changed_by, note
-        ) VALUES ($1, $2, 'DA_DONG', $3, 0, $4)
+        ) VALUES ($1, $2, 'DA_DONG', $3, $4, $5)
       `,
-        [phieu.ticket_id, trangThaiTruoc, phieu.closed_at, `Đóng phiếu từ trạng thái ${trangThaiTruoc}.`],
+        [phieu.ticket_id, trangThaiTruoc, phieu.closed_at, maNguoiDung, `Đóng phiếu từ trạng thái ${trangThaiTruoc}.`],
       );
       await ketNoi.query("COMMIT");
       return phieu;
@@ -258,16 +307,17 @@ export default class KhoPhieu {
         ],
       );
       const phieu = cacDong[0];
-      // 0 là tác nhân hệ thống cho trạng thái khởi tạo vì L2 chưa có đăng nhập/nhân viên.
+      // Ghi nhận người dùng đã xác thực tạo phiếu.
       await ketNoi.query(
         `
         INSERT INTO ticket_status_log (
           ticket_id, from_status, to_status, changed_at, changed_by, note
-        ) VALUES ($1, NULL, 'MOI', $2, 0, $3)
+        ) VALUES ($1, NULL, 'MOI', $2, $3, $4)
       `,
         [
           phieu.ticket_id,
           duLieu.received_at,
+          duLieu.changed_by,
           "Khởi tạo phiếu ở trạng thái Mới.",
         ],
       );

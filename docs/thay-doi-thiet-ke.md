@@ -82,3 +82,26 @@
 - Lý do : Luồng hiện tại cần cho phép nhân viên đóng phiếu ở bất kỳ trạng thái nào; chỉ phiếu đã `DA_DONG` mới không thể đóng lại.
 - Ảnh hưởng : Nút Đóng phiếu hiển thị cho mọi trạng thái trừ `DA_DONG`. Repository cập nhật trạng thái và `closed_at`, đồng thời ghi log với `from_status` lấy từ trạng thái thực tế của phiếu và `to_status = 'DA_DONG'` trong cùng transaction. Hợp đồng API và README được cập nhật cho hành vi mới. SRS mô tả chuỗi trạng thái vòng đời nhưng không nêu điều kiện bắt buộc phải ở `HOAN_TAT` mới được đóng; điều kiện cũ nằm trong `docs/api-contract.md` và ghi nhận triển khai TD-08.
 - File thay đổi: `src/services/ticketService.js`, `src/repositories/ticketRepository.js`, `frontend/src/components/TicketDetail.jsx`, `frontend/src/api/tickets.api.js`, `docs/api-contract.md`, `docs/thay-doi-thiet-ke.md`, `README.md`.
+
+## Bổ sung khi hiện thực BT3
+
+### TD-10 Bổ sung chức năng phân quyền truy cập theo vai trò và trung tâm
+
+- Yêu cầu: Quản lý chỉ xem phiếu, không tạo/sửa/đóng; nhân viên tiếp nhận chỉ xem và thao tác trên phiếu thuộc trung tâm của mình; quản lý xem số điện thoại đầy đủ còn nhân viên thấy số đã che.
+- Quyết định: BỔ SUNG chức năng xác thực và phân quyền truy cập vào luồng L2.
+- Lý do: Thực hiện kiểm soát truy cập ở cả giao diện và API để thao tác bị vô hiệu hóa trên giao diện vẫn không thể gọi trực tiếp.
+- Ảnh hưởng: Thêm bảng `service_center`, `app_user`, `app_session` và migration `007_create_access_control.sql`; dùng `ticket.center_id` có sẵn, không thêm cột vào `ticket`. Tài khoản nhân viên gắn với một trung tâm; quản lý không gắn trung tâm và được xem phiếu ở mọi trung tâm. Backend lấy trung tâm của nhân viên từ phiên đăng nhập, giới hạn danh sách/chi tiết/cập nhật/đóng theo trung tâm; phiếu ngoài trung tâm được trả như không tồn tại. Giao diện vô hiệu hóa nút tạo phiếu với quản lý, API vẫn chặn thao tác này.
+- Xác thực và bảo vệ dữ liệu: mật khẩu băm bằng scrypt với salt ngẫu nhiên; mã phiên ngẫu nhiên được lưu dưới dạng SHA-256 trong CSDL, hết hạn sau 8 giờ. Cookie phiên đặt `HttpOnly`, `SameSite=Strict`; thuộc tính `Secure` bật trong production hoặc theo `AUTH_COOKIE_SECURE`. Đăng nhập bị giới hạn sau 5 lần sai trong 15 phút theo địa chỉ IP; bộ đếm hiện lưu trong bộ nhớ một tiến trình. Lỗi hệ thống trả thông báo chung, chi tiết được ghi log phía máy chủ. Hiện không cấu hình CORS; giao diện dùng cùng origin/proxy trong cấu hình phát triển.
+- Nhật ký và giới hạn quyền sở hữu: ghi `user_id` vào `ticket_status_log.changed_by` khi tạo/đóng phiếu; đây là người thực hiện sự kiện, không phải trường lưu người tạo phiếu. Phân quyền hiện theo vai trò và trung tâm, không phân biệt nhân viên nào tạo phiếu. Không có API xóa phiếu; do đó chưa thể kiểm tra quyền xóa qua API. Không bổ sung trường người tạo vào `ticket` trong quyết định này.
+- Giới hạn dữ liệu: Hai trung tâm mẫu có ID 0 và 1 (Trung tâm A/B); migration giữ lại các ID trung tâm đã xuất hiện trên phiếu hiện hữu. Checklist Buổi 13 đánh giá A01 đạt theo phạm vi phân quyền theo trung tâm; dự án không phân biệt nhân viên tạo phiếu. A05 đạt một phần: đã thử payload qua API, chưa thử XSS trực tiếp trên trình duyệt.
+- File thay đổi: `migrations/007_create_access_control.sql`, `scripts/seedDemoUsers.js`, `scripts/createUser.js`, `src/middleware/authMiddleware.js`, `src/repositories/userRepository.js`, `src/services/authService.js`, `src/routes/authRoute.js`, `src/routes/ticketRoute.js`, `src/services/ticketService.js`, `src/repositories/ticketRepository.js`, frontend, `docs/srs.md`, `docs/api-contract.md`, `docs/checklist-bao-mat.md`, README và `.env.example`.
+
+### TD-11 Gán quản lý vào nhiều trung tâm
+
+- Yêu cầu: Quản lý chỉ được xem phiếu thuộc một hoặc nhiều trung tâm được giao; không có quyền sửa, tạo hoặc đóng phiếu.
+- Quyết định: BỔ SUNG bảng liên kết `user_center` giữa tài khoản quản lý và trung tâm.
+- Lý do: Một trường `app_user.center_id` chỉ biểu diễn được một trung tâm, trong khi quản lý có thể phụ trách nhiều trung tâm. Không thêm cột vào `ticket` và không thay đổi quyền theo người tạo phiếu.
+- Ảnh hưởng: Thêm migration `008_create_user_center.sql`; các quản lý đã tồn tại được gán các trung tâm hiện có để giữ phạm vi xem trước migration. Tài khoản demo `quanly` được gán Trung tâm A và B. Khi đăng nhập/xác thực, API trả thêm `center_ids`; danh sách và chi tiết phiếu của quản lý được giới hạn theo các ID này. Quản lý không được gán trung tâm nào không nhìn thấy phiếu nào. Nhân viên tiếp nhận vẫn bị giới hạn ở `app_user.center_id`.
+- Thay đổi này thay thế hành vi ban đầu trong TD-10 cho phép quản lý xem tất cả trung tâm; kể từ TD-11, phạm vi xem được quyết định bởi các dòng phân công trong `user_center`.
+- Tạo tài khoản quản lý tùy chỉnh cần biến `APP_USER_CENTER_IDS` chứa một hoặc nhiều ID trung tâm phân cách bằng dấu phẩy; script xác nhận các trung tâm tồn tại trước khi tạo tài khoản và liên kết.
+- File thay đổi: `migrations/008_create_user_center.sql`, `src/repositories/userRepository.js`, `src/services/authService.js`, `src/services/ticketService.js`, `src/repositories/ticketRepository.js`, `scripts/createUser.js`, `scripts/seedDemoUsers.js`, `docs/api-contract.md`.

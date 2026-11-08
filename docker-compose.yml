@@ -29,6 +29,12 @@ services:
       DB_NAME: ${DB_NAME:-mekong_mobile_l2}
       DB_USER: ${DB_USER:-postgres}
       DB_PASSWORD: ${DB_PASSWORD:-mekong_mobile_l2_dev}
+      AUTH_COOKIE_SECURE: ${AUTH_COOKIE_SECURE:-false}
+      APP_USER_USERNAME: ${APP_USER_USERNAME:-}
+      APP_USER_PASSWORD: ${APP_USER_PASSWORD:-}
+      APP_USER_ROLE: ${APP_USER_ROLE:-}
+      APP_USER_CENTER_ID: ${APP_USER_CENTER_ID:-}
+      APP_USER_CENTER_IDS: ${APP_USER_CENTER_IDS:-}
     ports:
       - "3001:3001"
     restart: unless-stopped
