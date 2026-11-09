@@ -8,15 +8,15 @@ KHÔNG kiểm: quyền sửa phiếu theo người tạo; màn hình cấu hình
 
 ## 2. Loại test và số lượng
 
-12 test case (TC-01 đến TC-12): 6 Unit, 3 Integration với PostgreSQL, 3 API qua HTTP. TC-10 dùng service và repository thật trên PostgreSQL để kiểm tra phiếu trùng.
+15 test case (TC-01 đến TC-15): 8 Unit, 4 Integration với PostgreSQL, 3 API qua HTTP. TC-10 dùng service và repository thật trên PostgreSQL để kiểm tra phiếu trùng.
 
 Kỹ thuật chọn dữ liệu: phân vùng tương đương; kiểm tra QT-04 với ưu tiên Trung bình qua cuối tuần; giá trị biên cho QT-05.
 
-Đủ 5 loại BT3: luồng đúng ×4 · biên ×2 · dữ liệu sai ×4 · bảo mật/chất lượng dữ liệu ×1 · tái lập ×1.
+Đủ 5 loại BT3: luồng đúng ×4 · biên ×3 · dữ liệu sai ×6 · bảo mật/chất lượng dữ liệu ×1 · tái lập ×1.
 
 ## 3. Tiêu chí thành công
 
-- Có đúng 12 test case, đánh số TC-01 đến TC-12; mỗi quy tắc nghiệp vụ thuộc phạm vi có ít nhất một test case.
+- Có đúng 15 test case, đánh số TC-01 đến TC-15; mỗi quy tắc nghiệp vụ thuộc phạm vi có ít nhất một test case.
 - Các ca lỗi đối chiếu mã lỗi, thông báo và mã HTTP khi kiểm thử qua API; dữ liệu không hợp lệ không được lưu.
 - Không còn bug Critical đang mở; bug Major còn lại có lý do và hướng xử lý.
 

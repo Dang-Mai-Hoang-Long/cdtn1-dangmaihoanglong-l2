@@ -260,3 +260,41 @@ test(
     }
   },
 );
+
+// TC-15 — dữ liệu sai: HOAN_TAT vẫn là phiếu chưa đóng, không được tạo phiếu mới.
+test(
+  "TC-15 từ chối tạo phiếu mới khi thiết bị có phiếu HOAN_TAT chưa đóng",
+  { skip: !chuoiKetNoiTest, timeout: 180_000 },
+  async () => {
+    const coSoDuLieu = await dungLaiCoSoDuLieuTest();
+    try {
+      const {
+        rows: [thietBi],
+      } = await coSoDuLieu.query(`
+        SELECT d.device_id, d.customer_id
+        FROM device d
+        JOIN ticket t ON t.device_id = d.device_id
+        WHERE t.status = 'HOAN_TAT' AND t.closed_at IS NULL
+        LIMIT 1
+      `);
+      assert.ok(thietBi, "Cần dữ liệu thiết bị có phiếu HOAN_TAT chưa đóng");
+
+      const dichVuPhieu = new DichVuPhieu(new KhoPhieu(coSoDuLieu));
+      await assert.rejects(
+        dichVuPhieu.xacNhanTaoPhieu({
+          customer_id: Number(thietBi.customer_id),
+          device_id: Number(thietBi.device_id),
+          center_id: 0,
+          issue_desc: "Yêu cầu tạo phiếu mới khi phiếu cũ chưa đóng.",
+          category_id: 1,
+          priority: "TRUNG_BINH",
+          received_at: new Date(),
+          due_date: new Date(Date.now() + 72 * 60 * 60 * 1000),
+        }),
+        (loi) => loi.maLoi === "TICKET_CONFLICT",
+      );
+    } finally {
+      await coSoDuLieu.end();
+    }
+  },
+);

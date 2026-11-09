@@ -215,3 +215,57 @@
 **7. Kết quả thực tế:** PASS — chạy seed lần hai thành công; số lượng khách hàng, thiết bị, phiếu và log trước/sau bằng nhau.
 
 **8. PASS / FAIL:** PASS
+
+## TC-13
+
+**1. Mã test case:** TC-13 tính lại hạn cam kết thay vì lấy `due_date` mới do client gửi.
+
+**2. Tiền điều kiện:** Unit test dùng repository giả; khách hàng, thiết bị còn bảo hành và nhóm sự cố đều hợp lệ.
+
+**3. Các bước thực hiện:** 1. Gọi service chuẩn bị dữ liệu phiếu với ưu tiên `TRUNG_BINH`. 2. Gửi `received_at = 2030-01-01T00:00:00.000Z` và `due_date = 2099-01-01T00:00:00.000Z`. 3. So sánh hạn service trả về với hạn theo QT-04.
+
+**4. Dữ liệu thử:** `customer_id = 1`; `device_id = 2`; `category_id = 3`; `priority = TRUNG_BINH`; thời điểm nhận `2030-01-01T00:00:00.000Z`; hạn client gửi `2099-01-01T00:00:00.000Z`.
+
+**5. Kết quả mong đợi:** Service tính hạn từ thời điểm nhận theo SLA 72 giờ làm việc, bỏ qua Chủ nhật; không sử dụng hạn tùy ý do client gửi.
+
+**6. Mức ưu tiên:** Cao.
+
+**7. Kết quả thực tế:** FAIL — lỗi được tái hiện. Service giữ nguyên hạn năm 2099 (`4070908800000` ms), khác hạn mong đợi của ca (`1893715200000` ms). Ca riêng đã chạy bằng Node `v24.22.0`.
+
+**8. PASS / FAIL:** FAIL
+
+## TC-14
+
+**1. Mã test case:** TC-14 chấp nhận thiết bị còn bảo hành tại thời điểm tiếp nhận dù hiện tại đã hết hạn.
+
+**2. Tiền điều kiện:** Unit test dùng repository giả; thiết bị có ngày mua và thời hạn bảo hành một tháng.
+
+**3. Các bước thực hiện:** 1. Đặt ngày mua vào ngày đầu tháng cách hiện tại hai tháng. 2. Đặt `received_at` vào ngày 16 của tháng mua, khi thiết bị vẫn trong hạn. 3. Gọi service chuẩn bị dữ liệu tạo phiếu và kiểm tra kết quả bảo hành.
+
+**4. Dữ liệu thử:** `purchase_date` là ngày đầu tháng cách hiện tại hai tháng; `warranty_months = 1`; `received_at` là ngày 16 của tháng mua.
+
+**5. Kết quả mong đợi:** Theo QT-05, service xác định thiết bị còn bảo hành tại `received_at` và tiếp tục chuẩn bị phiếu.
+
+**6. Mức ưu tiên:** Cao.
+
+**7. Kết quả thực tế:** FAIL — lỗi được tái hiện. Service so sánh với thời điểm hiện tại, trả `WARRANTY_NOT_APPROVED` dù thiết bị còn hạn tại ngày tiếp nhận. Ca riêng chạy bằng Node `v24.22.0`.
+
+**8. PASS / FAIL:** FAIL
+
+## TC-15
+
+**1. Mã test case:** TC-15 từ chối tạo phiếu mới khi thiết bị có phiếu `HOAN_TAT` chưa đóng.
+
+**2. Tiền điều kiện:** PostgreSQL test database có thiết bị với phiếu `HOAN_TAT` và `closed_at IS NULL`.
+
+**3. Các bước thực hiện:** 1. Tìm thiết bị có phiếu `HOAN_TAT` chưa đóng. 2. Gọi service xác nhận tạo phiếu mới cho thiết bị đó. 3. Kiểm tra mã lỗi và dữ liệu sau thao tác.
+
+**4. Dữ liệu thử:** Thiết bị tìm được trong test database; ưu tiên `TRUNG_BINH`; nhóm sự cố ID `1`.
+
+**5. Kết quả mong đợi:** Service trả `TICKET_CONFLICT`; không tạo phiếu mới.
+
+**6. Mức ưu tiên:** Cao.
+
+**7. Kết quả thực tế:** CHƯA CHẠY ĐƯỢC — kết nối PostgreSQL test database tại `localhost:5432` bị từ chối (`EACCES`). Chưa xác minh dữ liệu seed có tình huống cần thiết.
+
+**8. PASS / FAIL:** FAIL

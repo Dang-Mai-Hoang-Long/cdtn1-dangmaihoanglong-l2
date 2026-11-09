@@ -97,3 +97,28 @@ test("TC-08 từ chối tạo phiếu khi không tìm thấy khách hàng hoặc
   );
   assert.equal(khoPhieu.soLanTaoPhieuThanhCong, 0);
 });
+
+// TC-14 — QT-05 xét hạn bảo hành tại thời điểm tiếp nhận, không phải thời điểm hiện tại.
+test("TC-14 chấp nhận thiết bị còn bảo hành tại received_at dù hiện tại đã hết hạn", async () => {
+  const ngayHienTai = new Date();
+  const ngayMua = new Date(Date.UTC(
+    ngayHienTai.getUTCFullYear(),
+    ngayHienTai.getUTCMonth() - 2,
+    1,
+  ));
+  const ngayTiepNhan = new Date(ngayMua);
+  ngayTiepNhan.setUTCDate(16);
+  const chuoiNgayMua = ngayMua.toISOString().slice(0, 10);
+  const chuoiNgayTiepNhan = ngayTiepNhan.toISOString();
+  const dichVu = new DichVuPhieu(taoKhoPhieuGia({
+    thietBi: { purchase_date: chuoiNgayMua, warranty_months: 1 },
+  }));
+
+  const ketQua = await dichVu.chuanBiDuLieuTaoPhieu({
+    ...duLieuPhieuHopLe,
+    priority: "TRUNG_BINH",
+    received_at: chuoiNgayTiepNhan,
+  });
+
+  assert.equal(ketQua.is_warranty, true);
+});
