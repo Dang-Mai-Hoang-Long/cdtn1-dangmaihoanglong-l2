@@ -16,4 +16,14 @@
 4. **Cách tái lập — các bước tối thiểu:** Dùng thiết bị có thời hạn bảo hành một tháng; đặt `received_at` vào ngày 16 của tháng mua; chạy yêu cầu sau khi thời hạn đó đã kết thúc. Trước khi sửa, service trả `WARRANTY_NOT_APPROVED` dù thiết bị còn hạn tại ngày tiếp nhận.
 5. **Nguyên nhân — nguyên nhân thật:** Service gọi `conHanBaoHanh(thietBi)` không truyền mốc tiếp nhận, khiến hàm dùng `new Date()` hiện tại thay vì ngày tiếp nhận như QT-05 quy định.
 6. **Cách sửa — sửa gì, ở tệp nào:** Trong `src/services/ticketService.js`, xác định `thoiDiemNhan` trước bước kiểm tra bảo hành và truyền mốc đó vào `conHanBaoHanh(thietBi, thoiDiemNhan)`.
-7. **Link commit sửa bug + xác nhận test:** Không tạo commit theo yêu cầu người dùng. Đã chạy TC-14 và TC-13 bằng Node `v24.22.0`; cả hai **PASS**.
+7. **Link commit sửa bug + xác nhận test:** https://github.com/Dang-Mai-Hoang-Long/cdtn1-dangmaihoanglong-l2/commit/817f7a1a5a2a99e0a093a93c9eda6c69577a4a6e, Đã chạy TC-14 và TC-13 bằng Node `v24.22.0`; cả hai **PASS**.
+
+## BUG-03 — Major
+
+1. **Mã bug và mức độ:** BUG-03 — Major
+2. **Phát hiện bởi test case nào:** TC-15
+3. **Triệu chứng — người dùng thấy gì:** Nhân viên có thể tạo thêm phiếu cho thiết bị đang có phiếu `HOAN_TAT` nhưng chưa chuyển sang `DA_DONG`, khiến một thiết bị có nhiều yêu cầu chưa kết thúc.
+4. **Cách tái lập — các bước tối thiểu:** Dùng thiết bị có phiếu trạng thái `HOAN_TAT` và `closed_at IS NULL`; xác nhận tạo phiếu mới cho cùng thiết bị. Trước khi sửa, bước kiểm tra trước và bước ghi nhận đều cho phép tạo.
+5. **Nguyên nhân — nguyên nhân thật:** Hai truy vấn trong `ticketRepository.js` loại `HOAN_TAT` khỏi các trạng thái được xem là chưa đóng, dù phiếu chỉ thực sự kết thúc khi được đóng (`DA_DONG`) hoặc hủy (`DA_HUY`).
+6. **Cách sửa — sửa gì, ở tệp nào:** Trong `src/repositories/ticketRepository.js`, bỏ `HOAN_TAT` khỏi danh sách trạng thái loại trừ ở cả `coPhieuChuaDong` và truy vấn kiểm tra nguyên tử trong `taoPhieu`.
+7. **Link commit sửa bug + xác nhận test:** Chưa có commit. Đã chạy TC-15 bằng Node `v24.22.0` với PostgreSQL test database; **PASS**.

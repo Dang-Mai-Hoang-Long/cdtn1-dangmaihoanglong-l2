@@ -266,6 +266,6 @@
 
 **6. Mức ưu tiên:** Cao.
 
-**7. Kết quả thực tế:** CHƯA CHẠY ĐƯỢC — kết nối PostgreSQL test database tại `localhost:5432` bị từ chối (`EACCES`). Chưa xác minh dữ liệu seed có tình huống cần thiết.
+**7. Kết quả thực tế:** PASS — PostgreSQL có thiết bị với phiếu `HOAN_TAT` chưa đóng; service trả `TICKET_CONFLICT` và không tạo phiếu mới. TC-15 chạy bằng Node `v24.22.0` với PostgreSQL test database.
 
-**8. PASS / FAIL:** FAIL
+**8. PASS / FAIL:** PASS

@@ -243,7 +243,7 @@ export default class KhoPhieu {
     const { rows } = await this.boKetNoi.query(
       `
       SELECT 1 FROM ticket
-      WHERE device_id = $1 AND status NOT IN ('HOAN_TAT', 'DA_DONG', 'DA_HUY')
+      WHERE device_id = $1 AND status NOT IN ('DA_DONG', 'DA_HUY')
       LIMIT 1
     `,
       [maThietBi],
@@ -268,7 +268,7 @@ export default class KhoPhieu {
       const { rows: cacPhieuMo } = await ketNoi.query(
         `
         SELECT ticket_id FROM ticket
-        WHERE device_id = $1 AND status NOT IN ('HOAN_TAT', 'DA_DONG', 'DA_HUY')
+        WHERE device_id = $1 AND status NOT IN ('DA_DONG', 'DA_HUY')
         FOR UPDATE
       `,
         [duLieu.device_id],
