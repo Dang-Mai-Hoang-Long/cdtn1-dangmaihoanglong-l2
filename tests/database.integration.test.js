@@ -48,9 +48,21 @@ test(
   async () => {
     const coSoDuLieu = await dungLaiCoSoDuLieuTest();
     try {
+      const {
+        rows: [thietBiTrong],
+      } = await coSoDuLieu.query(`
+        SELECT d.device_id, d.customer_id
+        FROM device d
+        WHERE d.serial_no = $1
+          AND NOT EXISTS (
+            SELECT 1 FROM ticket t WHERE t.device_id = d.device_id
+          )
+      `, ["DEMO-IMEI-L2-001"]);
+      assert.ok(thietBiTrong, "Seed phải có thiết bị chưa từng có phiếu");
+
       const duLieuGuiDi = {
-        customer_id: 1,
-        device_id: 1,
+        customer_id: Number(thietBiTrong.customer_id),
+        device_id: Number(thietBiTrong.device_id),
         center_id: 0,
         issue_desc: "Máy không nhận sạc khi dùng bộ sạc chính hãng.",
         category_id: 1,

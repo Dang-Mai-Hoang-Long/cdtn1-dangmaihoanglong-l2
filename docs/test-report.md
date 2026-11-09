@@ -40,11 +40,11 @@
 
 **1. Mã test case:** TC-03 nhân viên tạo phiếu thành công trả về 201 và có ticket_code.
 
-**2. Tiền điều kiện:** PostgreSQL database `_test` dựng từ migration và seed; thiết bị `DEMO-IMEI-L2-001` chưa có phiếu chưa đóng; API test xác thực nhân viên trung tâm `0`.
+**2. Tiền điều kiện:** PostgreSQL database `_test` dựng từ migration và seed; thiết bị `DEMO-IMEI-L2-001` chưa có phiếu; API test xác thực nhân viên trung tâm `0`.
 
 **3. Các bước thực hiện:** 1. Gửi `POST /api/tickets/preview` với dữ liệu hợp lệ. 2. Dùng `received_at` và `due_date` từ response để gửi `POST /api/tickets`. 3. Đọc response HTTP. 4. Truy vấn log khởi tạo của phiếu vừa tạo.
 
-**4. Dữ liệu thử:** `customer_id = 1`; `device_id = 1`; `center_id = 0`; `category_id = 1`; `priority = TRUNG_BINH`; `issue_desc = Máy không nhận sạc khi dùng bộ sạc chính hãng.`; `received_at` là thời điểm hiện tại; `due_date` sau `received_at` 72 giờ.
+**4. Dữ liệu thử:** `serial_no = DEMO-IMEI-L2-001`; `customer_id` và `device_id` được lấy từ thiết bị trong seed; `center_id = 0`; `category_id = 1`; `priority = TRUNG_BINH`; `issue_desc = Máy không nhận sạc khi dùng bộ sạc chính hãng.`; `received_at` là thời điểm hiện tại; `due_date` từ kết quả xem trước.
 
 **5. Kết quả mong đợi:** HTTP `201`; response có `ticket_id`, `ticket_code` dạng `BH-000000/YYYY`, `status = MOI`, `priority = TRUNG_BINH`; có đúng một log chuyển khởi tạo sang `MOI` cho phiếu mới.
 
