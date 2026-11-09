@@ -6,7 +6,7 @@
 4. **Cách tái lập — các bước tối thiểu:** Xem trước một phiếu hợp lệ, sau đó gửi yêu cầu xác nhận tạo phiếu với `received_at` lấy từ xem trước nhưng thay `due_date` bằng `2099-01-01T00:00:00.000Z`. Trước khi sửa, service giữ nguyên hạn năm 2099.
 5. **Nguyên nhân — nguyên nhân thật:** `chuanBiDuLieuTaoPhieu` ưu tiên dùng `duLieu.due_date` từ request; chỉ tính hạn theo QT-04 khi trường này bị thiếu. Backend vì vậy tin giá trị do client gửi thay vì tự xác định hạn từ `received_at` và `priority`.
 6. **Cách sửa — sửa gì, ở tệp nào:** Trong `src/services/ticketService.js`, luôn tính `due_date` bằng `tinhHanCamKet(thoiDiemNhan, mucUuTien)`; bỏ qua `due_date` client gửi. TC-13 được cập nhật xác nhận hành vi này.
-7. **Link commit sửa bug + xác nhận test:**https://github.com/Dang-Mai-Hoang-Long/cdtn1-dangmaihoanglong-l2/commit/4b443173b510ca4c798f043170de3fc8a12b582a — đã chạy lại TC-13 bằng Node `v24.22.0`; **PASS**.
+7. **Link commit sửa bug + xác nhận test:** https://github.com/Dang-Mai-Hoang-Long/cdtn1-dangmaihoanglong-l2/commit/4b443173b510ca4c798f043170de3fc8a12b582a — đã chạy lại TC-13 bằng Node `v24.22.0`; **PASS**.
 
 ## BUG-02 — Major
 
@@ -26,4 +26,4 @@
 4. **Cách tái lập — các bước tối thiểu:** Dùng thiết bị có phiếu trạng thái `HOAN_TAT` và `closed_at IS NULL`; xác nhận tạo phiếu mới cho cùng thiết bị. Trước khi sửa, bước kiểm tra trước và bước ghi nhận đều cho phép tạo.
 5. **Nguyên nhân — nguyên nhân thật:** Hai truy vấn trong `ticketRepository.js` loại `HOAN_TAT` khỏi các trạng thái được xem là chưa đóng, dù phiếu chỉ thực sự kết thúc khi được đóng (`DA_DONG`) hoặc hủy (`DA_HUY`).
 6. **Cách sửa — sửa gì, ở tệp nào:** Trong `src/repositories/ticketRepository.js`, bỏ `HOAN_TAT` khỏi danh sách trạng thái loại trừ ở cả `coPhieuChuaDong` và truy vấn kiểm tra nguyên tử trong `taoPhieu`.
-7. **Link commit sửa bug + xác nhận test:** Chưa có commit. Đã chạy TC-15 bằng Node `v24.22.0` với PostgreSQL test database; **PASS**.
+7. **Link commit sửa bug + xác nhận test:** https://github.com/Dang-Mai-Hoang-Long/cdtn1-dangmaihoanglong-l2/commit/37e1786256625d1d6f9067d11ed5c34530586518. Đã chạy TC-15 bằng Node `v24.22.0` với PostgreSQL test database; **PASS**.
