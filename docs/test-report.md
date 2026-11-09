@@ -248,9 +248,9 @@
 
 **6. Mức ưu tiên:** Cao.
 
-**7. Kết quả thực tế:** FAIL — lỗi được tái hiện. Service so sánh với thời điểm hiện tại, trả `WARRANTY_NOT_APPROVED` dù thiết bị còn hạn tại ngày tiếp nhận. Ca riêng chạy bằng Node `v24.22.0`.
+**7. Kết quả thực tế:** PASS — service xác định thiết bị còn bảo hành tại `received_at` và tiếp tục chuẩn bị phiếu, dù thời điểm hiện tại đã qua hạn. Ca riêng chạy bằng Node `v24.22.0`.
 
-**8. PASS / FAIL:** FAIL
+**8. PASS / FAIL:** PASS
 
 ## TC-15
 

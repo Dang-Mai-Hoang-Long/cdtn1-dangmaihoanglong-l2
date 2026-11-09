@@ -81,7 +81,10 @@ export default class DichVuPhieu {
       throw new LoiUngDung("VALIDATION_FAILED", "Dữ liệu không hợp lệ", {
         category_id: "Nhóm sự cố không hợp lệ",
       });
-    const conHan = conHanBaoHanh(thietBi);
+    const thoiDiemNhan = duLieu.received_at
+      ? new Date(duLieu.received_at)
+      : new Date();
+    const conHan = conHanBaoHanh(thietBi, thoiDiemNhan);
     if (!conHan) {
       throw new LoiUngDung(
         "WARRANTY_NOT_APPROVED",
@@ -90,9 +93,6 @@ export default class DichVuPhieu {
     }
     const mucUuTien = duLieu.priority || danhMuc.default_priority;
     // Giữ thời điểm đã xem trước, nhưng luôn tính lại hạn từ ưu tiên ở phía server.
-    const thoiDiemNhan = duLieu.received_at
-      ? new Date(duLieu.received_at)
-      : new Date();
     const hanCamKet = tinhHanCamKet(thoiDiemNhan, mucUuTien);
     return {
       ...duLieu,
