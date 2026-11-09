@@ -89,12 +89,11 @@ export default class DichVuPhieu {
       );
     }
     const mucUuTien = duLieu.priority || danhMuc.default_priority;
-    // Khi tạo thật, nhận lại hai mốc đã xem trước để không sinh hạn lần nữa.
+    // Giữ thời điểm đã xem trước, nhưng luôn tính lại hạn từ ưu tiên ở phía server.
     const thoiDiemNhan = duLieu.received_at
       ? new Date(duLieu.received_at)
       : new Date();
-    let hanCamKet = duLieu.due_date ? new Date(duLieu.due_date) : null;
-    if (!hanCamKet) hanCamKet = tinhHanCamKet(thoiDiemNhan, mucUuTien);
+    const hanCamKet = tinhHanCamKet(thoiDiemNhan, mucUuTien);
     return {
       ...duLieu,
       priority: mucUuTien,

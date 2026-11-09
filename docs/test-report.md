@@ -230,9 +230,9 @@
 
 **6. Mức ưu tiên:** Cao.
 
-**7. Kết quả thực tế:** FAIL — lỗi được tái hiện. Service giữ nguyên hạn năm 2099 (`4070908800000` ms), khác hạn mong đợi của ca (`1893715200000` ms). Ca riêng đã chạy bằng Node `v24.22.0`.
+**7. Kết quả thực tế:** PASS — service bỏ qua hạn năm 2099 do client gửi và tính lại hạn theo thời điểm tiếp nhận cùng mức ưu tiên. Ca riêng chạy bằng Node `v24.22.0`.
 
-**8. PASS / FAIL:** FAIL
+**8. PASS / FAIL:** PASS
 
 ## TC-14
 
