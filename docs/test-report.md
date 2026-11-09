@@ -40,17 +40,17 @@
 
 **1. Mã test case:** TC-03 nhân viên tạo phiếu thành công trả về 201 và có ticket_code.
 
-**2. Tiền điều kiện:** PostgreSQL database `_test` dựng từ migration và seed; thiết bị `DEMO-IMEI-L2-001` chưa có phiếu; API test xác thực nhân viên trung tâm `0`.
+**2. Tiền điều kiện:** PostgreSQL database `_test` dựng từ migration và seed; thiết bị `DEMO-IMEI-L2-001` chưa có phiếu và đang trong hạn bảo hành; API test xác thực nhân viên `user_id = 1` tại trung tâm `0`.
 
-**3. Các bước thực hiện:** 1. Gửi `POST /api/tickets/preview` với dữ liệu hợp lệ. 2. Dùng `received_at` và `due_date` từ response để gửi `POST /api/tickets`. 3. Đọc response HTTP. 4. Truy vấn log khởi tạo của phiếu vừa tạo.
+**3. Các bước thực hiện:** 1. Gửi `POST /api/tickets/preview` với thiết bị và khách hàng hợp lệ, `received_at` vào thứ Sáu 09:00 Bangkok và `center_id = 1` để kiểm tra backend không tin trung tâm do client cung cấp. 2. Kiểm tra preview xác nhận ưu tiên, bảo hành và hạn cam kết. 3. Gửi `POST /api/tickets` với `received_at` và `due_date` từ preview. 4. Kiểm tra HTTP response và các trường đã lưu trong `ticket`. 5. Kiểm tra log khởi tạo và mã phiếu duy nhất.
 
-**4. Dữ liệu thử:** `serial_no = DEMO-IMEI-L2-001`; `customer_id` và `device_id` được lấy từ thiết bị trong seed; `center_id = 0`; `category_id = 1`; `priority = TRUNG_BINH`; `issue_desc = Máy không nhận sạc khi dùng bộ sạc chính hãng.`; `received_at` là thời điểm hiện tại; `due_date` từ kết quả xem trước.
+**4. Dữ liệu thử:** `serial_no = DEMO-IMEI-L2-001`; `customer_id` và `device_id` lấy từ thiết bị trong seed; `center_id = 1` gửi từ client trong khi phiên thuộc trung tâm `0`; `category_id = 1`; `priority = TRUNG_BINH`; `issue_desc = Máy không nhận sạc khi dùng bộ sạc chính hãng.`; `received_at` vào thứ Sáu 09:00 Bangkok; `due_date` kỳ vọng thứ Ba 09:00 Bangkok (72 giờ làm việc, bỏ Chủ nhật).
 
-**5. Kết quả mong đợi:** HTTP `201`; response có `ticket_id`, `ticket_code` dạng `BH-000000/YYYY`, `status = MOI`, `priority = TRUNG_BINH`; có đúng một log chuyển khởi tạo sang `MOI` cho phiếu mới.
+**5. Kết quả mong đợi:** Preview trả HTTP `200`, xác nhận `priority = TRUNG_BINH`, `is_warranty = true` và `due_date` đúng thứ Ba 09:00 Bangkok. Tạo phiếu trả HTTP `201`, mã phiếu đúng định dạng và duy nhất; dữ liệu lưu có đúng khách hàng–thiết bị sở hữu, `center_id = 0` lấy từ phiên, mô tả/nhóm/ưu tiên đúng request, `status = MOI`, `is_warranty = true`, `received_at` giữ nguyên và `due_date` khớp preview. Phiếu có log khởi tạo `from_status = NULL`, `to_status = MOI`, `changed_by = 1`.
 
 **6. Mức ưu tiên:** Cao.
 
-**7. Kết quả thực tế:** PASS — xem trước trả HTTP `200`; xác nhận tạo phiếu trả HTTP `201`; `ticket_code` đúng định dạng, status `MOI`, priority `TRUNG_BINH`; phiếu có một log khởi tạo `MOI`.
+**7. Kết quả thực tế:** PASS — preview trả HTTP `200` và hạn cam kết đúng thứ Ba 09:00 Bangkok; tạo phiếu trả HTTP `201`. Các trường khách hàng, thiết bị, trung tâm, mô tả, nhóm, ưu tiên, trạng thái, bảo hành và hai mốc thời gian đã lưu đúng; `due_date` khớp preview; mã phiếu là duy nhất; log khởi tạo ghi đúng người dùng. TC-03 chạy bằng Node `v24.22.0` với PostgreSQL test database.
 
 **8. PASS / FAIL:** PASS
 

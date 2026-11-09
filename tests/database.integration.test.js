@@ -50,23 +50,37 @@ test(
     try {
       const {
         rows: [thietBiTrong],
-      } = await coSoDuLieu.query(`
+      } = await coSoDuLieu.query(
+        `
         SELECT d.device_id, d.customer_id
         FROM device d
         WHERE d.serial_no = $1
           AND NOT EXISTS (
             SELECT 1 FROM ticket t WHERE t.device_id = d.device_id
           )
-      `, ["DEMO-IMEI-L2-001"]);
+      `,
+        ["DEMO-IMEI-L2-001"],
+      );
       assert.ok(thietBiTrong, "Seed phải có thiết bị chưa từng có phiếu");
+
+      // Thứ Sáu 09:00 Bangkok + 72 giờ làm việc (bỏ Chủ nhật) = thứ Ba 09:00.
+      const thoiDiemNhan = new Date();
+      const soNgayLuiDenThuSau = (thoiDiemNhan.getUTCDay() + 2) % 7;
+      thoiDiemNhan.setUTCDate(thoiDiemNhan.getUTCDate() - soNgayLuiDenThuSau);
+      thoiDiemNhan.setUTCHours(2, 0, 0, 0);
+      const hanCamKetMongDoi = new Date(
+        thoiDiemNhan.getTime() + 96 * 60 * 60 * 1000,
+      );
 
       const duLieuGuiDi = {
         customer_id: Number(thietBiTrong.customer_id),
         device_id: Number(thietBiTrong.device_id),
-        center_id: 0,
+        // Backend phải lấy center_id từ phiên, không tin giá trị client gửi.
+        center_id: 1,
         issue_desc: "Máy không nhận sạc khi dùng bộ sạc chính hãng.",
         category_id: 1,
         priority: "TRUNG_BINH",
+        received_at: thoiDiemNhan.toISOString(),
       };
       const phanHoiXemTruoc = await guiYeuCauApi(
         coSoDuLieu,
@@ -78,12 +92,17 @@ test(
         },
       );
       assert.equal(phanHoiXemTruoc.maHttp, 200);
+      assert.equal(phanHoiXemTruoc.noiDung.priority, duLieuGuiDi.priority);
+      assert.equal(phanHoiXemTruoc.noiDung.is_warranty, true);
+      assert.equal(
+        new Date(phanHoiXemTruoc.noiDung.due_date).toISOString(),
+        hanCamKetMongDoi.toISOString(),
+      );
       const phanHoi = await guiYeuCauApi(coSoDuLieu, "/api/tickets", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...duLieuGuiDi,
-          received_at: phanHoiXemTruoc.noiDung.received_at,
           due_date: phanHoiXemTruoc.noiDung.due_date,
         }),
       });
@@ -92,11 +111,66 @@ test(
       assert.match(phanHoi.noiDung.ticket_code, /^BH-\d{6}\/\d{4}$/);
       assert.equal(phanHoi.noiDung.status, "MOI");
       assert.equal(phanHoi.noiDung.priority, "TRUNG_BINH");
-      const { rows } = await coSoDuLieu.query(
-        `SELECT COUNT(*)::int AS total FROM ticket_status_log WHERE ticket_id = $1 AND to_status = 'MOI'`,
+      assert.equal(phanHoi.noiDung.category_id, duLieuGuiDi.category_id);
+      assert.equal(
+        new Date(phanHoi.noiDung.received_at).toISOString(),
+        new Date(phanHoiXemTruoc.noiDung.received_at).toISOString(),
+      );
+      assert.equal(
+        new Date(phanHoi.noiDung.due_date).toISOString(),
+        new Date(phanHoiXemTruoc.noiDung.due_date).toISOString(),
+      );
+
+      const {
+        rows: [phieuDaLuu],
+      } = await coSoDuLieu.query(
+        `
+          SELECT ticket_id, ticket_code, customer_id, device_id, center_id,
+                 issue_desc, category_id, priority, status, received_at,
+                 due_date, is_warranty
+          FROM ticket WHERE ticket_id = $1
+        `,
         [phanHoi.noiDung.ticket_id],
       );
-      assert.equal(rows[0].total, 1);
+      assert.ok(phieuDaLuu, "Phiếu đã xác nhận phải được lưu");
+      assert.equal(Number(phieuDaLuu.customer_id), duLieuGuiDi.customer_id);
+      assert.equal(Number(phieuDaLuu.device_id), duLieuGuiDi.device_id);
+      assert.equal(Number(phieuDaLuu.center_id), 0);
+      assert.equal(phieuDaLuu.issue_desc, duLieuGuiDi.issue_desc);
+      assert.equal(Number(phieuDaLuu.category_id), duLieuGuiDi.category_id);
+      assert.equal(phieuDaLuu.priority, duLieuGuiDi.priority);
+      assert.equal(phieuDaLuu.status, "MOI");
+      assert.equal(phieuDaLuu.is_warranty, true);
+      assert.equal(
+        new Date(phieuDaLuu.received_at).toISOString(),
+        new Date(phanHoiXemTruoc.noiDung.received_at).toISOString(),
+      );
+      assert.equal(
+        new Date(phieuDaLuu.due_date).toISOString(),
+        new Date(phanHoiXemTruoc.noiDung.due_date).toISOString(),
+      );
+
+      const {
+        rows: [logKhoiTao],
+      } = await coSoDuLieu.query(
+        `
+          SELECT from_status, to_status, changed_by
+          FROM ticket_status_log
+          WHERE ticket_id = $1 AND to_status = 'MOI'
+        `,
+        [phanHoi.noiDung.ticket_id],
+      );
+      assert.ok(logKhoiTao, "Phiếu phải có log khởi tạo trạng thái");
+      assert.equal(logKhoiTao.from_status, null);
+      assert.equal(logKhoiTao.to_status, "MOI");
+      assert.equal(Number(logKhoiTao.changed_by), 1);
+      const {
+        rows: [demMaPhieu],
+      } = await coSoDuLieu.query(
+        "SELECT COUNT(*)::int AS total FROM ticket WHERE ticket_code = $1",
+        [phieuDaLuu.ticket_code],
+      );
+      assert.equal(demMaPhieu.total, 1);
     } finally {
       await coSoDuLieu.end();
     }
