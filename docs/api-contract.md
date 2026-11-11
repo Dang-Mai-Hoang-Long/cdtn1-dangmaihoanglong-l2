@@ -4,21 +4,21 @@ Tài liệu này mô tả API hiện được triển khai trong dự án. Các 
 
 ## Danh sách endpoint
 
-| Method | Endpoint | Xác thực | Mục đích |
-|:--:|---|:--:|---|
-| GET | `/health` | Không | Kiểm tra ứng dụng còn hoạt động |
-| POST | `/api/auth/login` | Không | Đăng nhập, cấp cookie phiên |
-| GET | `/api/auth/me` | Có | Lấy tài khoản đang đăng nhập |
-| POST | `/api/auth/logout` | Không bắt buộc | Thu hồi phiên hiện tại và xóa cookie |
-| GET | `/api/customers?phone={phone}` | Có | Tra cứu khách hàng theo số điện thoại |
-| GET | `/api/devices?serial={serial}&customer_id={customer_id}` | Có | Tra cứu thiết bị, kiểm tra khách hàng sở hữu và bảo hành |
-| GET | `/api/tickets/categories` | Có | Lấy danh mục sự cố đang hoạt động |
-| POST | `/api/tickets/preview` | Nhân viên tiếp nhận | Kiểm tra nghiệp vụ, tính thông tin xác nhận; không lưu phiếu |
-| POST | `/api/tickets` | Nhân viên tiếp nhận | Tạo phiếu sau khi xác nhận thông tin xem trước |
-| GET | `/api/tickets?status={status}&page={page}&size={size}&sort={sort}` | Có | Xem danh sách, lọc, phân trang và sắp xếp |
-| GET | `/api/tickets/{ticket_id}` | Có | Xem chi tiết phiếu |
-| PUT | `/api/tickets/{ticket_id}` | Nhân viên tiếp nhận | Cập nhật mô tả, nhóm sự cố và mức ưu tiên |
-| PATCH | `/api/tickets/{ticket_id}/status` | Nhân viên tiếp nhận | Đóng phiếu và ghi nhật ký trạng thái |
+| Method | Endpoint                                                           |      Xác thực       | Mục đích                                                     |
+| :----: | ------------------------------------------------------------------ | :-----------------: | ------------------------------------------------------------ |
+|  GET   | `/health`                                                          |        Không        | Kiểm tra API và kết nối PostgreSQL                           |
+|  POST  | `/api/auth/login`                                                  |        Không        | Đăng nhập, cấp cookie phiên                                  |
+|  GET   | `/api/auth/me`                                                     |         Có          | Lấy tài khoản đang đăng nhập                                 |
+|  POST  | `/api/auth/logout`                                                 |   Không bắt buộc    | Thu hồi phiên hiện tại và xóa cookie                         |
+|  GET   | `/api/customers?phone={phone}`                                     |         Có          | Tra cứu khách hàng theo số điện thoại                        |
+|  GET   | `/api/devices?serial={serial}&customer_id={customer_id}`           |         Có          | Tra cứu thiết bị, kiểm tra khách hàng sở hữu và bảo hành     |
+|  GET   | `/api/tickets/categories`                                          |         Có          | Lấy danh mục sự cố đang hoạt động                            |
+|  POST  | `/api/tickets/preview`                                             | Nhân viên tiếp nhận | Kiểm tra nghiệp vụ, tính thông tin xác nhận; không lưu phiếu |
+|  POST  | `/api/tickets`                                                     | Nhân viên tiếp nhận | Tạo phiếu sau khi xác nhận thông tin xem trước               |
+|  GET   | `/api/tickets?status={status}&page={page}&size={size}&sort={sort}` |         Có          | Xem danh sách, lọc, phân trang và sắp xếp                    |
+|  GET   | `/api/tickets/{ticket_id}`                                         |         Có          | Xem chi tiết phiếu                                           |
+|  PUT   | `/api/tickets/{ticket_id}`                                         | Nhân viên tiếp nhận | Cập nhật mô tả, nhóm sự cố và mức ưu tiên                    |
+| PATCH  | `/api/tickets/{ticket_id}/status`                                  | Nhân viên tiếp nhận | Đóng phiếu và ghi nhật ký trạng thái                         |
 
 ## Quy ước chung
 
@@ -44,14 +44,14 @@ Tài liệu này mô tả API hiện được triển khai trong dự án. Các 
 
 ## Lỗi dùng chung
 
-| HTTP | Mã lỗi | Khi nào |
-|:--:|---|---|
-| 400 | `INVALID_JSON` | Body JSON sai cú pháp |
-| 401 | `UNAUTHENTICATED` | Thiếu phiên hoặc phiên không hợp lệ/hết hạn |
-| 403 | `FORBIDDEN` | Vai trò không được phép thực hiện thao tác |
-| 404 | `NOT_FOUND` | API hoặc phiếu không tồn tại/không thuộc trung tâm người dùng |
-| 429 | `TOO_MANY_LOGIN_ATTEMPTS` | Vượt giới hạn đăng nhập sai |
-| 500 | `INTERNAL_SERVER_ERROR` | Lỗi không được ánh xạ thành lỗi ứng dụng cụ thể; response không tiết lộ chi tiết nội bộ |
+| HTTP | Mã lỗi                    | Khi nào                                                                                 |
+| :--: | ------------------------- | --------------------------------------------------------------------------------------- |
+| 400  | `INVALID_JSON`            | Body JSON sai cú pháp                                                                   |
+| 401  | `UNAUTHENTICATED`         | Thiếu phiên hoặc phiên không hợp lệ/hết hạn                                             |
+| 403  | `FORBIDDEN`               | Vai trò không được phép thực hiện thao tác                                              |
+| 404  | `NOT_FOUND`               | API hoặc phiếu không tồn tại/không thuộc trung tâm người dùng                           |
+| 429  | `TOO_MANY_LOGIN_ATTEMPTS` | Vượt giới hạn đăng nhập sai                                                             |
+| 500  | `INTERNAL_SERVER_ERROR`   | Lỗi không được ánh xạ thành lỗi ứng dụng cụ thể; response không tiết lộ chi tiết nội bộ |
 
 ## Chi tiết endpoint
 
@@ -59,10 +59,16 @@ Tài liệu này mô tả API hiện được triển khai trong dự án. Các 
 
 Không cần đăng nhập.
 
-**Response `200 OK`**
+**Response `200 OK` — truy vấn PostgreSQL thành công**
 
 ```json
-{ "status": "ok" }
+{ "status": "ok", "db": "up" }
+```
+
+**Response `503 Service Unavailable` — không truy vấn được PostgreSQL**
+
+```json
+{ "status": "error", "db": "down" }
 ```
 
 ### POST /api/auth/login
@@ -147,9 +153,7 @@ Yêu cầu đăng nhập với một trong hai vai trò. Không cần query ho�
 **Response `200 OK`**
 
 ```json
-[
-  { "category_id": 1, "category_name": "Sạc", "default_priority": "TRUNG_BINH" }
-]
+[{ "category_id": 1, "category_name": "Sạc", "default_priority": "TRUNG_BINH" }]
 ```
 
 ### POST /api/tickets/preview
@@ -282,14 +286,14 @@ Chỉ nhân viên tiếp nhận và chỉ áp dụng cho phiếu thuộc trung t
 
 ## Tóm tắt validation theo endpoint
 
-| Endpoint | Trường/điều kiện chính | Nơi kiểm tra hiện tại |
-|---|---|---|
-| `POST /api/auth/login` | Tài khoản tồn tại, đang hoạt động và mật khẩu đúng | `authService`; giới hạn lần sai tại `authRoute` |
-| `GET /api/customers` | Số điện thoại chuẩn hóa thành 10 chữ số bắt đầu bằng 0 | `customerService` |
-| `GET /api/devices` | `serial` không trống; `customer_id` là số nguyên dương; thiết bị thuộc khách hàng | `deviceValidator`, `deviceService` |
-| `POST /api/tickets/preview` | ID hợp lệ, mô tả không trống, ưu tiên hợp lệ nếu gửi; kiểm tra khách hàng, thiết bị, quyền sở hữu thiết bị và bảo hành; trung tâm lấy từ phiên | `ticketValidator`, `ticketService` |
-| `POST /api/tickets` | Các trường preview cùng `received_at`, `due_date` hợp lệ; kiểm tra trùng phiếu khi ghi | `ticketValidator`, `ticketService`, `ticketRepository` |
-| `GET /api/tickets` | Trạng thái hợp lệ; `page` dương; `size` từ 1 đến 100; `sort` hỗ trợ; lọc trung tâm theo vai trò | `ticketValidator`, `ticketService`, `ticketRepository` |
-| `GET /api/tickets/{ticket_id}` | Mã phiếu là số nguyên dương; kiểm tra phạm vi trung tâm và che số theo vai trò | `ticketValidator`, `ticketService`, `ticketRepository` |
-| `PUT /api/tickets/{ticket_id}` | Mô tả không trống; nhóm sự cố/ưu tiên hợp lệ; trạng thái phiếu cho phép sửa | `ticketValidator`, `ticketService`, `ticketRepository` |
-| `PATCH /api/tickets/{ticket_id}/status` | Chỉ nhận trạng thái đích `DA_DONG`; kiểm tra phạm vi trung tâm và trạng thái hiện tại | `ticketValidator`, `ticketService`, `ticketRepository` |
+| Endpoint                                | Trường/điều kiện chính                                                                                                                         | Nơi kiểm tra hiện tại                                  |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| `POST /api/auth/login`                  | Tài khoản tồn tại, đang hoạt động và mật khẩu đúng                                                                                             | `authService`; giới hạn lần sai tại `authRoute`        |
+| `GET /api/customers`                    | Số điện thoại chuẩn hóa thành 10 chữ số bắt đầu bằng 0                                                                                         | `customerService`                                      |
+| `GET /api/devices`                      | `serial` không trống; `customer_id` là số nguyên dương; thiết bị thuộc khách hàng                                                              | `deviceValidator`, `deviceService`                     |
+| `POST /api/tickets/preview`             | ID hợp lệ, mô tả không trống, ưu tiên hợp lệ nếu gửi; kiểm tra khách hàng, thiết bị, quyền sở hữu thiết bị và bảo hành; trung tâm lấy từ phiên | `ticketValidator`, `ticketService`                     |
+| `POST /api/tickets`                     | Các trường preview cùng `received_at`, `due_date` hợp lệ; kiểm tra trùng phiếu khi ghi                                                         | `ticketValidator`, `ticketService`, `ticketRepository` |
+| `GET /api/tickets`                      | Trạng thái hợp lệ; `page` dương; `size` từ 1 đến 100; `sort` hỗ trợ; lọc trung tâm theo vai trò                                                | `ticketValidator`, `ticketService`, `ticketRepository` |
+| `GET /api/tickets/{ticket_id}`          | Mã phiếu là số nguyên dương; kiểm tra phạm vi trung tâm và che số theo vai trò                                                                 | `ticketValidator`, `ticketService`, `ticketRepository` |
+| `PUT /api/tickets/{ticket_id}`          | Mô tả không trống; nhóm sự cố/ưu tiên hợp lệ; trạng thái phiếu cho phép sửa                                                                    | `ticketValidator`, `ticketService`, `ticketRepository` |
+| `PATCH /api/tickets/{ticket_id}/status` | Chỉ nhận trạng thái đích `DA_DONG`; kiểm tra phạm vi trung tâm và trạng thái hiện tại                                                          | `ticketValidator`, `ticketService`, `ticketRepository` |

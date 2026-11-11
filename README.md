@@ -39,16 +39,16 @@ Sau khi clone dự án, mở terminal tại thư mục gốc của dự án. Ki�
 
 ### Chạy bằng Docker
 
-1. Cài và mở Docker Desktop, bảo đảm Docker Compose v2 hoạt động.
-2. Tại thư mục gốc dự án, chạy một lệnh:
+1. Cài và mở Docker Desktop, bảo đảm Docker Compose v2 hoạt động. Tạo `.env` từ `.env.example` nếu muốn tùy chỉnh cấu hình.
+2. Tại thư mục gốc dự án, chạy:
 
 ```bash
-docker compose up --build
+docker compose up -d --build
 ```
 
-Compose tự tạo PostgreSQL, chờ database sẵn sàng, chạy migrations và seed dữ liệu nghiệp vụ, sau đó khởi động ứng dụng. Để thêm tài khoản demo vào database Docker, chạy `docker compose exec app node scripts/seedDemoUsers.js`. Mở http://localhost:3001. Dữ liệu database được giữ trong volume `du-lieu-postgres` khi container dừng. Nếu muốn chạy nền, thêm `-d` vào lệnh; dừng các container bằng `docker compose down`.
+Compose tự tạo PostgreSQL, chờ database sẵn sàng, chạy migrations và seed dữ liệu nghiệp vụ, tạo/cập nhật năm tài khoản demo rồi khởi động ứng dụng. Cả hai dịch vụ có healthcheck; `/health` kiểm tra kết nối PostgreSQL. Mở http://localhost:3001. Dữ liệu database được giữ trong volume `du-lieu-postgres` khi container dừng. Dừng các container bằng `docker compose down`.
 
-Compose mặc định dùng mật khẩu demo cục bộ `mekong_mobile_l2_dev`. Có thể tạo `.env` từ `.env.example` và thay `DB_PASSWORD` trước khi chạy Docker.
+Compose mặc định dùng mật khẩu PostgreSQL demo cục bộ `mekong_mobile_l2_dev`; nếu `.env` có `DB_PASSWORD`, Compose dùng giá trị trong tệp đó. Các tài khoản demo dùng mật khẩu `MekongL2Demo!2026`; mật khẩu này được đặt lại khi container ứng dụng khởi động. Chỉ dùng các thông tin này trong môi trường học tập/local, không dùng cho triển khai chia sẻ hoặc production.
 
 Tạo tài khoản tùy chỉnh trong Docker bằng cách đặt `APP_USER_*` trong `.env`, sau đó chạy `docker compose exec app node scripts/createUser.js`. `AUTH_COOKIE_SECURE=false` phù hợp với HTTP cục bộ; khi đặt sau HTTPS reverse proxy, bật `AUTH_COOKIE_SECURE=true`.
 
@@ -72,7 +72,7 @@ Tạo tài khoản tùy chỉnh trong Docker bằng cách đặt `APP_USER_*` tr
 │   └── db.js                          # Cấu hình kết nối PostgreSQL
 ├── migrations/                        # Các bước tạo cấu trúc cơ sở dữ liệu
 ├── seeds/                             # Dữ liệu mẫu
-├── scripts/                           # Chạy migration và seed
+├── scripts/                           # Migration, seed và chạy test trong Docker
 ├── tests/                             # Kiểm thử bằng Node.js Test Runner
 │   ├── customers.service.test.js        # Tra cứu/chuẩn hóa và che số điện thoại
 │   ├── customers.api.test.js            # API tra cứu khách hàng
@@ -86,7 +86,7 @@ Tạo tài khoản tùy chỉnh trong Docker bằng cách đặt `APP_USER_*` tr
 │   ├── ai-disclosure.md                # Khai báo sử dụng AI
 │   ├── api-contract.md                 # Hợp đồng API
 │   ├── api-docs/                       # Tài liệu API tiếng Anh theo BT3
-│   │   └── .gitkeep
+│   │   └── api-reference.md
 │   ├── bug-log.md                      # Bug Log
 │   ├── checklist-bao-mat.md            # Checklist bảo mật
 │   ├── deployment-guide.md             # Deployment Guide
@@ -114,10 +114,18 @@ Chạy toàn bộ kiểm thử bằng một lệnh:
 npm test
 ```
 
-Bộ kiểm thử hiện có 14 ca `TC-01` đến `TC-14`. Bốn ca tích hợp trong `database.integration.test.js` cần `TEST_DATABASE_URL` trỏ tới database riêng có hậu tố `_test`; các ca này dựng lại schema trong database đó. Không trỏ biến này vào database đang dùng để chạy ứng dụng. Nếu chưa đặt biến, bốn ca PostgreSQL sẽ bị bỏ qua.
+Bộ kiểm thử hiện có 15 ca `TC-01` đến `TC-15`. Sáu ca truy cập PostgreSQL trong `database.integration.test.js` (TC-03, TC-04, TC-10, TC-11, TC-12, TC-15) cần database riêng có hậu tố `_test`; các ca này dựng lại schema trong database đó. Không trỏ biến này vào database đang dùng để chạy ứng dụng. Nếu chạy `npm test` trực tiếp trên máy mà chưa đặt `TEST_DATABASE_URL`, sáu ca này sẽ bị bỏ qua.
+
+Chạy toàn bộ bộ kiểm thử trong Docker, không cần cài Node.js hoặc PostgreSQL trên máy:
+
+```bash
+docker compose --profile test run --build --rm test npm test
+```
+
+Lệnh này dùng chung PostgreSQL container với ứng dụng nhưng tự tạo database logic riêng có tên `${DB_NAME}_test` (mặc định `mekong_mobile_l2_test`). Các ca tích hợp dựng lại schema trong database `_test`; dữ liệu ứng dụng trong database `mekong_mobile_l2` không bị xóa. Chạy `docker compose up -d` trước là tùy chọn vì lệnh test tự khởi động dịch vụ database phụ thuộc.
 
 ## 6. Trạng thái hiện tại
 
 - [x] Module L2 tiếp nhận và phân loại: tra cứu khách hàng/thiết bị, kiểm tra dữ liệu, xem trước và tạo phiếu, tính hạn cam kết, xem/lọc danh sách, xem/sửa chi tiết và đóng phiếu ở mọi trạng thái trừ Đã đóng.
 - [x] Dựng cơ sở dữ liệu bằng migrations, nạp dữ liệu mẫu bằng seeds và có bộ kiểm thử nghiệp vụ.
-- [x] Có Dockerfile và Docker Compose để chạy ứng dụng cùng PostgreSQL bằng một lệnh.
+- [x] Có Dockerfile và Docker Compose để chạy ứng dụng cùng PostgreSQL; tự migration, seed, tạo tài khoản demo và kiểm tra sức khỏe dịch vụ.

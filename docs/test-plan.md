@@ -8,7 +8,7 @@ KHÔNG kiểm: quyền sửa phiếu theo người tạo; màn hình cấu hình
 
 ## 2. Loại test và số lượng
 
-15 test case (TC-01 đến TC-15): 8 Unit, 4 Integration với PostgreSQL, 3 API qua HTTP. TC-10 dùng service và repository thật trên PostgreSQL để kiểm tra phiếu trùng.
+15 test case (TC-01 đến TC-15): 8 Unit, 4 Integration với PostgreSQL, 3 API qua HTTP. Nhóm API gồm TC-03, TC-09 và TC-11; TC-03 và TC-11 chạy qua HTTP, trong đó có dùng PostgreSQL thử. Bốn ca Integration còn lại là TC-04, TC-10, TC-12 và TC-15. TC-10 dùng service và repository thật trên PostgreSQL để kiểm tra phiếu trùng.
 
 Kỹ thuật chọn dữ liệu: phân vùng tương đương; kiểm tra QT-04 với ưu tiên Trung bình qua cuối tuần; giá trị biên cho QT-05.
 
@@ -22,4 +22,4 @@ Kỹ thuật chọn dữ liệu: phân vùng tương đương; kiểm tra QT-04 
 
 ## 4. Môi trường và dữ liệu thử
 
-PostgreSQL thử riêng có hậu tố `_test`; helper dựng lại schema và seed trước các ca tích hợp. Chạy `npm test` sau khi cài đúng phiên bản Node.js và cấu hình `TEST_DATABASE_URL`.
+Sáu ca cần PostgreSQL (TC-03, TC-04, TC-10, TC-11, TC-12, TC-15) dùng database logic riêng có hậu tố `_test`; helper dựng lại schema và seed trước mỗi ca tích hợp. Có thể chạy `npm test` trên máy có Node.js và tự cấu hình `TEST_DATABASE_URL`, hoặc chạy trong Docker bằng `docker compose --profile test run --build --rm test npm test`. Test runner tự tạo `${DB_NAME}_test` trên cùng PostgreSQL container; tuyệt đối không trỏ test vào database ứng dụng.

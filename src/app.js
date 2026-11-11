@@ -27,8 +27,13 @@ export function taoUngDung({ coSoDuLieu = boKetNoi, middlewareXacThuc } = {}) {
   ungDung.disable('x-powered-by');
   ungDung.use(ungDungExpress.json());
 
-  ungDung.get('/health', (_yeuCau, phanHoi) => {
-    phanHoi.json({ status: 'ok' });
+  ungDung.get('/health', async (_yeuCau, phanHoi) => {
+    try {
+      await coSoDuLieu.query('SELECT 1');
+      phanHoi.json({ status: 'ok', db: 'up' });
+    } catch {
+      phanHoi.status(503).json({ status: 'error', db: 'down' });
+    }
   });
 
   const khoPhieu = new KhoPhieu(coSoDuLieu);
